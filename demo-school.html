@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>«Демо-школа» (пример онлайн-обучения): EsepDos</title>
+<link rel="icon" type="image/svg+xml" href="logo.svg">
+<link rel="icon" type="image/png" href="favicon.png">
+<meta name="description" content="Пример учёта онлайн-обучения в Telegram: ученики по потокам, оплаты, доступы и отчёт по каждому потоку.">
+<style>
+  :root{--teal:#1f9e90;--teal2:#2bb3a3;--tealbg:#e8f6f4;--gold:#f4c542;--ink:#12161c;--hint:#5b6470;--line:#e4e7eb;--bg:#f6f7f9;--card:#fff;--red:#d64545;--redbg:#fdecec;--amber:#b7791f;--amberbg:#fdf4e3}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--ink);background:var(--bg);line-height:1.45;-webkit-font-smoothing:antialiased}
+  .app{max-width:480px;margin:0 auto;min-height:100vh;padding-bottom:84px}
+  .top{position:sticky;top:0;z-index:5;background:rgba(246,247,249,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:10px 16px}
+  .top .row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .back{font-size:14px;color:var(--teal);text-decoration:none;font-weight:600}
+  .badge{font-size:11px;font-weight:700;color:var(--amber);background:var(--amberbg);padding:3px 8px;border-radius:999px}
+  .ttl{font-size:19px;font-weight:700;margin-top:6px}
+  .sub{font-size:13px;color:var(--hint)}
+  main{padding:14px 16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px}
+  .tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+  .tile{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px}
+  .tile .l{font-size:12px;color:var(--hint)}
+  .tile .v{font-size:20px;font-weight:700;margin-top:2px}
+  .tile .n{font-size:12px;color:var(--hint);margin-top:2px}
+  .tile.hl{background:var(--tealbg);border-color:transparent}
+  .tile.hl .v{color:#11665c}
+  h3{font-size:16px;margin:4px 0 10px}
+  .muted{color:var(--hint);font-size:13px}
+  .line{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid var(--line);font-size:14px}
+  .line:first-of-type{border-top:0}
+  .line b{white-space:nowrap}
+  .line.tot{font-weight:700;border-top:2px solid var(--ink)}
+  .neg{color:var(--red)}
+  .pos{color:#11665c}
+  .search{display:flex;gap:8px;margin-bottom:10px}
+  .search input{flex:1;font:inherit;font-size:15px;padding:11px 12px;border:1.5px solid var(--line);border-radius:12px;background:#fff;outline:none}
+  .search input:focus{border-color:var(--teal)}
+  .chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:10px;scrollbar-width:none}
+  .chip{flex:none;font-size:13px;padding:6px 11px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer;font-family:inherit}
+  .chip.on{background:var(--teal);border-color:var(--teal);color:#fff}
+  .st{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line);cursor:pointer}
+  .st:first-child{border-top:0}
+  .ava{width:38px;height:38px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:15px}
+  .st .nm{font-weight:600;font-size:15px}
+  .st .in{font-size:12px;color:var(--hint)}
+  .st .rt{margin-left:auto;text-align:right;font-size:13px;white-space:nowrap}
+  .pill{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px}
+  .p-ok{background:var(--tealbg);color:#11665c}
+  .p-debt{background:var(--amberbg);color:var(--amber)}
+  .p-no{background:var(--redbg);color:var(--red)}
+  .stream{cursor:pointer}
+  .stream .hd{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+  .stream .hd b{font-size:16px}
+  .bar{height:8px;background:var(--line);border-radius:99px;overflow:hidden;margin:8px 0 4px}
+  .bar i{display:block;height:100%;background:var(--teal)}
+  .nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);padding:6px 0 calc(6px + env(safe-area-inset-bottom))}
+  .nav .in{max-width:480px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
+  .nav button{border:0;background:none;font-family:inherit;font-size:11px;color:var(--hint);padding:4px 0;cursor:pointer}
+  .nav button span{display:block;font-size:21px;line-height:1.2}
+  .nav button.on{color:var(--teal);font-weight:700}
+  .sheet{position:fixed;inset:0;background:rgba(18,22,28,.45);display:none;align-items:flex-end;justify-content:center;z-index:20}
+  .sheet.open{display:flex}
+  .sheet .box{background:var(--bg);width:100%;max-width:480px;max-height:88vh;overflow:auto;border-radius:20px 20px 0 0;padding:16px}
+  .close{float:right;border:0;background:#fff;border-radius:999px;width:32px;height:32px;font-size:18px;cursor:pointer}
+  .btn{display:block;width:100%;text-align:center;font:inherit;font-weight:700;font-size:15px;padding:13px;border-radius:12px;border:0;cursor:pointer;margin-top:8px}
+  .btn-teal{background:var(--teal);color:#fff}
+  .btn-ghost{background:#fff;color:var(--teal);border:1.5px solid var(--teal)}
+  .note{background:var(--tealbg);color:#1d4a45;border-radius:12px;padding:10px 12px;font-size:13px;margin-bottom:12px}
+  .found{background:#fff;border:2px solid var(--teal);border-radius:14px;padding:12px;margin-top:10px}
+  .bot{background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 12px;font-size:14px;margin-top:8px}
+  .bot.me{background:#e7f6e7;margin-left:40px}
+  .bot.it{margin-right:30px}
+  .toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:14px;padding:10px 14px;border-radius:12px;opacity:0;transition:.25s;pointer-events:none;z-index:30;max-width:90%}
+  .toast.on{opacity:1}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top">
+    <div class="row"><a class="back" href="./">‹ О сервисе и цены</a><span class="badge">ДЕМО · данные вымышленные</span></div>
+    <div class="ttl">Курс «Путешествия без переплат»</div>
+    <div class="sub" id="who">Онлайн-обучение в Telegram · ноябрь 2026</div>
+  </div>
+  <main id="view"></main>
+</div>
+<nav class="nav"><div class="in">
+  <button data-t="home" class="on"><span>📊</span>Итог</button>
+  <button data-t="students"><span>👥</span>Ученики</button>
+  <button data-t="streams"><span>🎓</span>Потоки</button>
+  <button data-t="money"><span>💰</span>Деньги</button>
+</div></nav>
+<div class="sheet" id="sheet"><div class="box" id="sheetBox"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+// Демо онлайн-школы: всё считается в браузере, данные вымышленные, ничего не сохраняется.
+(function () {
+  const fmt = n => Math.round(n).toLocaleString('ru-RU').replace(/,/g, ' ');
+  const tg = n => fmt(n) + ' ₸';
+  let seed = 7;
+  const rnd = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
+  const pick = a => a[Math.floor(rnd() * a.length)];
+
+  const TARIFS = { base: { name: 'Базовый', price: 29900 }, cur: { name: 'С куратором', price: 49900 } };
+  const STREAMS = [
+    { id: 4, name: 'Поток 4', month: 'Август', start: '05.08.2026', ads: 180000, plan: 30, state: 'Завершён' },
+    { id: 5, name: 'Поток 5', month: 'Сентябрь', start: '07.09.2026', ads: 210000, plan: 35, state: 'Завершён' },
+    { id: 6, name: 'Поток 6', month: 'Октябрь', start: '05.10.2026', ads: 240000, plan: 40, state: 'Завершён' },
+    { id: 7, name: 'Поток 7', month: 'Ноябрь', start: '09.11.2026', ads: 260000, plan: 40, state: 'Идёт' },
+    { id: 8, name: 'Поток 8', month: 'Декабрь', start: '07.12.2026', ads: 90000, plan: 40, state: 'Набор' },
+  ];
+  const COUNTS = { 4: 26, 5: 31, 6: 37, 7: 39, 8: 14 };
+  const FIRST = ['Айгерим', 'Дана', 'Жанна', 'Асель', 'Мадина', 'Алия', 'Динара', 'Камила', 'Сауле', 'Аружан', 'Томирис', 'Ерлан', 'Арман', 'Нурлан', 'Дамир', 'Гульнар', 'Анель', 'Карина', 'Ольга', 'Елена', 'Марат', 'Айдана', 'Индира', 'Самал', 'Жансая', 'Бекзат', 'Виктория', 'Лаура', 'Меруерт', 'Акмарал'];
+  const LAT = ['aigerim', 'dana', 'zhanna', 'asel', 'madina', 'aliya', 'dinara', 'kamila', 'saule', 'aruzhan', 'tomiris', 'erlan', 'arman', 'nurlan', 'damir', 'gulnar', 'anel', 'karina', 'olga', 'elena', 'marat', 'aidana', 'indira', 'samal', 'zhansaya', 'bekzat', 'viktoria', 'laura', 'meruert', 'akmaral'];
+  const LAST = ['К.', 'С.', 'Б.', 'А.', 'Т.', 'Н.', 'М.', 'Ж.', 'Е.', 'Р.', 'О.', 'Д.'];
+  const NICK = ['travel', 'aru', 'sky', 'trip', 'nomad', 'sun', 'go', 'fly', 'alma', 'kz', 'mira', 'star'];
+  const COLORS = ['#1f9e90', '#3b82c4', '#c4703b', '#8a5cc4', '#c43b6e', '#5a9e3b', '#b7791f'];
+
+  const S = [];
+  let num = 1;
+  STREAMS.forEach(st => {
+    for (let k = 0; k < COUNTS[st.id]; k++) {
+      const first = pick(FIRST), last = pick(LAST);
+      const tariff = rnd() < 0.35 ? 'cur' : 'base';
+      const price = TARIFS[tariff].price;
+      const r = rnd();
+      // рассрочка: часть платит двумя частями, у текущих потоков бывают недоплаты
+      let paid = price, parts = 1;
+      if (r < 0.25) { parts = 2; paid = st.id >= 7 && rnd() < 0.55 ? Math.round(price / 2) : price; }
+      const day = 1 + Math.floor(rnd() * 25);
+      const mm = { 4: '07', 5: '08', 6: '09', 7: '10', 8: '11' }[st.id];
+      const pays = [];
+      if (parts === 1) pays.push({ d: String(day).padStart(2, '0') + '.' + mm + '.2026', s: price, how: rnd() < 0.8 ? 'Kaspi QR' : 'Перевод Kaspi' });
+      else {
+        pays.push({ d: String(day).padStart(2, '0') + '.' + mm + '.2026', s: Math.round(price / 2), how: 'Kaspi QR' });
+        if (paid === price) pays.push({ d: String(Math.min(28, day + 3)).padStart(2, '0') + '.' + (st.id === 8 ? '11' : String(+mm + 1).padStart(2, '0')) + '.2026', s: price - Math.round(price / 2), how: 'Kaspi QR' });
+      }
+      const access = st.id <= 6 ? true : (paid >= price ? rnd() < 0.9 : rnd() < 0.5);
+      const id = num++;
+      S.push({
+        id, stream: st.id, name: first + ' ' + last, nick: '@' + pick(NICK) + '_' + LAT[FIRST.indexOf(first)].slice(0, 4) + (10 + id),
+        phone: '+7 700 000 ' + String(Math.floor(id / 100)).padStart(2, '0') + ' ' + String(id % 100).padStart(2, '0'),
+        tariff, price, paid, pays, access, color: COLORS[id % COLORS.length], refund: st.id === 6 && k === 3
+      });
+    }
+  });
+  // один возврат для примера
+  S.forEach(x => { if (x.refund) { x.paid = 0; x.access = false; x.pays.push({ d: '12.10.2026', s: -x.price, how: 'Возврат' }); } });
+
+  const status = x => x.refund ? ['Возврат', 'p-no'] : x.paid < x.price ? ['Доплата ' + fmt(x.price - x.paid), 'p-debt'] : !x.access ? ['Нет доступа', 'p-no'] : ['Оплачен · доступ', 'p-ok'];
+  const of = id => S.filter(x => x.stream === id && !x.refund);
+  const sum = (a, f) => a.reduce((t, x) => t + f(x), 0);
+  const CURATOR = 0.2;  // куратору 20% с тарифа «С куратором»
+  const streamMoney = st => {
+    const a = of(st.id);
+    const rev = sum(a, x => x.paid);
+    const cur = sum(a.filter(x => x.tariff === 'cur'), x => x.paid * CURATOR);
+    const kaspi = rev * 0.0095, tax = rev * 0.04, svc = 25000;
+    const profit = rev - st.ads - cur - kaspi - tax - svc;
+    return { a, rev, cur, kaspi, tax, svc, ads: st.ads, profit, debt: sum(a, x => x.price - x.paid), noacc: a.filter(x => x.paid >= x.price && !x.access).length };
+  };
+
+  const V = document.getElementById('view');
+  let filter = 'all', query = '';
+  const toast = t => { const e = document.getElementById('toast'); e.textContent = t; e.classList.add('on'); setTimeout(() => e.classList.remove('on'), 2200); };
+
+  function home() {
+    const cur = STREAMS.find(s => s.id === 7), m = streamMoney(cur);
+    const debtors = S.filter(x => !x.refund && x.paid < x.price);
+    const noacc = S.filter(x => !x.refund && x.paid >= x.price && !x.access);
+    const all = STREAMS.map(streamMoney);
+    V.innerHTML = `
+      <div class="note">Так выглядит учёт онлайн-курса в приложении EsepDos. Нажимайте всё: ученики, потоки, поиск по квитанции. Имена, номера и суммы вымышленные.</div>
+      <div class="tiles">
+        <div class="tile hl"><div class="l">Поток 7, прибыль</div><div class="v">${tg(m.profit)}</div><div class="n">из ${tg(m.rev)} оплат</div></div>
+        <div class="tile"><div class="l">Учеников в потоке 7</div><div class="v">${m.a.length}</div><div class="n">план ${cur.plan}</div></div>
+        <div class="tile"><div class="l">Ждём доплату</div><div class="v">${debtors.length}</div><div class="n">${tg(sum(debtors, x => x.price - x.paid))}</div></div>
+        <div class="tile"><div class="l">Оплатили, нет доступа</div><div class="v ${noacc.length ? 'neg' : ''}">${noacc.length}</div><div class="n">выдать сегодня</div></div>
+      </div>
+      <div class="card"><h3>🔎 Найти по квитанции</h3>
+        <div class="muted">Ученик прислал квитанцию или пишет «дайте доступ». Введите номер, ник, имя или сумму.</div>
+        <div class="search" style="margin-top:10px"><input id="q1" placeholder="Например: 00 37 или 49 900 или Дана"></div>
+        <div id="r1"></div>
+      </div>
+      ${noacc.length ? `<div class="card"><h3>⚠️ Оплатили, но нет доступа</h3>${noacc.map(row).join('')}</div>` : ''}
+      <div class="card"><h3>Прибыль по потокам</h3>
+        ${STREAMS.map((s, i) => `<div class="line"><span>${s.name} · ${s.month}${s.state !== 'Завершён' ? ' <span class="muted">(' + s.state.toLowerCase() + ')</span>' : ''}</span><b class="${all[i].profit < 0 ? 'neg' : ''}">${tg(all[i].profit)}</b></div>`).join('')}
+      </div>
+      <div class="card"><h3>💬 Ученик пишет не вам, а боту</h3>
+        <div class="muted" style="margin-bottom:6px">После оплаты ученик отправляет квитанцию боту курса. Вам в личку писать не нужно.</div>
+        <div class="bot me">Здравствуйте, оплатила курс, вот квитанция 📎 kaspi_49900.pdf</div>
+        <div class="bot it">Спасибо, Дана! Вижу оплату 49 900 ₸, тариф «С куратором», поток 8 (старт 07.12). Вот ваша ссылка в группу курса, она работает один раз: t.me/+demo_link</div>
+        <div class="bot me">Вошла, спасибо!</div>
+        <div class="muted" style="margin-top:10px">✅ Бот сам добавил Дану в таблицу Google «Ученики»: имя, ник, номер, сумма, поток, дата, доступ выдан. У вас есть доступ к этой таблице.<br>✅ Если квитанция странная (не та сумма, старая дата), бот не даёт доступ, а спрашивает вас.<br>✅ Раз в неделю финансист сверяет таблицу с выпиской Kaspi: оплаты без доступа и доступы без оплаты видны сразу.</div>
+      </div>`;
+    const q = document.getElementById('q1'), r = document.getElementById('r1');
+    q.oninput = () => {
+      const t = q.value.trim().toLowerCase().replace(/\s/g, '');
+      if (t.length < 2) { r.innerHTML = ''; return; }
+      const f = S.filter(x => (x.name + x.nick + x.phone.replace(/\s/g, '') + x.pays.map(p => p.s).join(' ')).toLowerCase().replace(/\s/g, '').includes(t)).slice(0, 4);
+      r.innerHTML = f.length ? f.map(x => `<div class="found" data-id="${x.id}">${row(x)}</div>`).join('') : '<div class="muted" style="margin-top:8px">Не нашли. Проверьте номер или сумму.</div>';
+      bindRows(r);
+    };
+    bindRows(V);
+  }
+
+  function row(x) {
+    const [t, c] = status(x);
+    const st = STREAMS.find(s => s.id === x.stream);
+    return `<div class="st" data-id="${x.id}"><div class="ava" style="background:${x.color}">${x.name[0]}</div>
+      <div><div class="nm">${x.name}</div><div class="in">${x.nick} · ${st.name} · ${TARIFS[x.tariff].name}</div></div>
+      <div class="rt"><span class="pill ${c}">${t}</span><div class="in" style="margin-top:3px">${tg(x.paid)}</div></div></div>`;
+  }
+  function bindRows(root) { root.querySelectorAll('.st').forEach(e => e.onclick = () => card(+e.dataset.id)); }
+
+  function students() {
+    const chips = [['all', 'Все'], ...STREAMS.map(s => [String(s.id), s.name]), ['debt', 'Доплата'], ['noacc', 'Нет доступа']];
+    const list = S.filter(x => {
+      if (filter === 'debt') return !x.refund && x.paid < x.price;
+      if (filter === 'noacc') return !x.refund && x.paid >= x.price && !x.access;
+      if (filter !== 'all') return x.stream === +filter;
+      return true;
+    }).filter(x => !query || (x.name + x.nick + x.phone.replace(/\s/g, '')).toLowerCase().includes(query)).sort((a, b) => b.stream - a.stream || a.name.localeCompare(b.name));
+    V.innerHTML = `
+      <div class="search"><input id="q2" placeholder="Имя, ник или номер" value="${query}"></div>
+      <div class="chips">${chips.map(([k, n]) => `<button class="chip ${filter === k ? 'on' : ''}" data-f="${k}">${n}</button>`).join('')}</div>
+      <div class="muted" style="margin-bottom:6px">${list.length} учеников · оплачено ${tg(sum(list, x => x.paid))}</div>
+      <div class="card">${list.map(row).join('') || '<div class="muted">Никого нет</div>'}</div>`;
+    V.querySelectorAll('.chip').forEach(b => b.onclick = () => { filter = b.dataset.f; students(); });
+    const q = document.getElementById('q2');
+    q.oninput = () => { query = q.value.trim().toLowerCase().replace(/\s/g, ''); const p = q.selectionStart; students(); const n = document.getElementById('q2'); n.focus(); n.setSelectionRange(p, p); };
+    bindRows(V);
+  }
+
+  function streams() {
+    V.innerHTML = STREAMS.slice().reverse().map(s => {
+      const m = streamMoney(s);
+      return `<div class="card stream" data-s="${s.id}"><div class="hd"><b>${s.name} · ${s.month}</b><span class="pill ${s.state === 'Набор' ? 'p-debt' : 'p-ok'}">${s.state}</span></div>
+        <div class="muted">Старт ${s.start} · учеников ${m.a.length} из ${s.plan}</div>
+        <div class="bar"><i style="width:${Math.min(100, m.a.length / s.plan * 100)}%"></i></div>
+        <div class="line"><span>Оплаты</span><b>${tg(m.rev)}</b></div>
+        <div class="line"><span>Реклама</span><b class="neg">−${tg(m.ads)}</b></div>
+        <div class="line"><span>Прибыль потока</span><b class="${m.profit < 0 ? 'neg' : 'pos'}">${tg(m.profit)}</b></div>
+        <div class="muted" style="margin-top:6px">Реклама на одного ученика: ${tg(m.ads / Math.max(1, m.a.length))} · нажмите, чтобы открыть</div></div>`;
+    }).join('');
+    V.querySelectorAll('.stream').forEach(e => e.onclick = () => streamCard(+e.dataset.s));
+  }
+
+  function streamCard(id) {
+    const s = STREAMS.find(x => x.id === id), m = streamMoney(s);
+    open(`<button class="close" onclick="document.getElementById('sheet').classList.remove('open')">×</button>
+      <h3>${s.name} · ${s.month}</h3><div class="muted">Старт ${s.start} · ${s.state.toLowerCase()}</div>
+      <div class="tiles" style="margin-top:12px">
+        <div class="tile"><div class="l">Учеников</div><div class="v">${m.a.length}</div><div class="n">базовый ${m.a.filter(x => x.tariff === 'base').length} · с куратором ${m.a.filter(x => x.tariff === 'cur').length}</div></div>
+        <div class="tile hl"><div class="l">Прибыль</div><div class="v">${tg(m.profit)}</div><div class="n">${m.rev ? Math.round(m.profit / m.rev * 100) : 0}% от оплат</div></div>
+      </div>
+      <div class="card"><h3>Деньги потока</h3>
+        <div class="line"><span>Оплаты учеников</span><b>${tg(m.rev)}</b></div>
+        <div class="line"><span>Реклама (таргет)</span><b class="neg">−${tg(m.ads)}</b></div>
+        <div class="line"><span>Куратор, 20% тарифа «С куратором»</span><b class="neg">−${tg(m.cur)}</b></div>
+        <div class="line"><span>Сервисы (Zoom, бот, хранилище)</span><b class="neg">−${tg(m.svc)}</b></div>
+        <div class="line"><span>Комиссия Kaspi</span><b class="neg">−${tg(m.kaspi)}</b></div>
+        <div class="line"><span>Налог (упрощёнка, пример 4%)</span><b class="neg">−${tg(m.tax)}</b></div>
+        <div class="line tot"><span>Прибыль</span><b class="${m.profit < 0 ? 'neg' : 'pos'}">${tg(m.profit)}</b></div>
+        ${m.debt ? `<div class="muted" style="margin-top:6px">Ещё ждём доплат: ${tg(m.debt)}</div>` : ''}
+      </div>
+      <div class="card"><h3>Ученики</h3>${m.a.map(row).join('')}</div>`);
+    bindRows(document.getElementById('sheetBox'));
+  }
+
+  function card(id) {
+    const x = S.find(s => s.id === id), st = STREAMS.find(s => s.id === x.stream), [t, c] = status(x);
+    open(`<button class="close" onclick="document.getElementById('sheet').classList.remove('open')">×</button>
+      <div style="display:flex;gap:12px;align-items:center"><div class="ava" style="background:${x.color};width:52px;height:52px;font-size:22px">${x.name[0]}</div>
+      <div><h3 style="margin:0">${x.name}</h3><div class="muted">${x.nick}</div></div></div>
+      <div class="card" style="margin-top:12px">
+        <div class="line"><span>Телефон</span><b>${x.phone}</b></div>
+        <div class="line"><span>Поток</span><b>${st.name} · ${st.month}</b></div>
+        <div class="line"><span>Тариф</span><b>${TARIFS[x.tariff].name} · ${tg(x.price)}</b></div>
+        <div class="line"><span>Статус</span><b><span class="pill ${c}">${t}</span></b></div>
+      </div>
+      <div class="card"><h3>Оплаты</h3>${x.pays.map(p => `<div class="line"><span>${p.d} · ${p.how}</span><b class="${p.s < 0 ? 'neg' : ''}">${tg(p.s)}</b></div>`).join('')}
+        ${x.paid < x.price && !x.refund ? `<div class="line"><span>Осталось доплатить</span><b class="neg">${tg(x.price - x.paid)}</b></div>` : ''}</div>
+      ${!x.refund && !x.access ? `<button class="btn btn-teal" id="give">✅ Отметить: доступ выдан</button>` : ''}
+      ${!x.refund && x.paid < x.price ? `<button class="btn btn-ghost" id="remind">Напомнить о доплате</button>` : ''}
+      <button class="btn btn-ghost" onclick="window.open('https://t.me/','_blank')">Написать в Telegram</button>`);
+    const g = document.getElementById('give'); if (g) g.onclick = () => { x.access = true; toast('Доступ отмечен (в демо не сохраняется)'); card(id); rerender(); };
+    const r = document.getElementById('remind'); if (r) r.onclick = () => toast('Бот отправит напоминание ученику (в демо не отправляется)');
+  }
+
+  function money() {
+    const all = STREAMS.map(streamMoney);
+    const months = [['Август', 0], ['Сентябрь', 1], ['Октябрь', 2], ['Ноябрь', 3]];
+    V.innerHTML = `
+      <div class="card"><h3>Ноябрь 2026: деньги за месяц</h3>
+        <div class="line"><span>Оплаты учеников (поток 7 и предоплаты потока 8)</span><b>${tg(all[3].rev + all[4].rev)}</b></div>
+        <div class="line"><span>Реклама</span><b class="neg">−${tg(all[3].ads + all[4].ads)}</b></div>
+        <div class="line"><span>Кураторы</span><b class="neg">−${tg(all[3].cur)}</b></div>
+        <div class="line"><span>Сервисы</span><b class="neg">−${tg(all[3].svc)}</b></div>
+        <div class="line"><span>Комиссия Kaspi и налог</span><b class="neg">−${tg(all[3].kaspi + all[3].tax + all[4].kaspi + all[4].tax)}</b></div>
+        <div class="line tot"><span>Осталось вам</span><b class="pos">${tg(all[3].rev + all[4].rev - all[3].ads - all[4].ads - all[3].cur - all[3].svc - all[3].kaspi - all[3].tax - all[4].kaspi - all[4].tax)}</b></div>
+      </div>
+      <div class="card"><h3>Прибыль по месяцам</h3>
+        ${months.map(([n, i]) => { const v = all[i].profit, mx = Math.max(...all.slice(0, 4).map(a => a.profit)); return `<div style="margin:8px 0"><div style="display:flex;justify-content:space-between;font-size:14px"><span>${n}</span><b>${tg(v)}</b></div><div class="bar"><i style="width:${Math.max(3, v / mx * 100)}%"></i></div></div>`; }).join('')}
+        <div class="muted">Растёт: каждый поток больше учеников. Реклама на одного ученика ${tg(all[3].ads / all[3].a.length)} против ${tg(all[0].ads / all[0].a.length)} в августе.</div>
+      </div>
+      <div class="card"><h3>Что подсказывает финансист</h3>
+        <div class="line"><span>💡 Тариф «С куратором» берут ${Math.round(all[3].a.filter(x => x.tariff === 'cur').length / all[3].a.length * 100)}% учеников и он даёт больше прибыли с ученика. Стоит показывать его первым.</span></div>
+        <div class="line"><span>💡 Доплаты по рассрочке ждём ${tg(sum(S.filter(x => !x.refund), x => x.price - x.paid))}. Бот напомнит за 3 дня до срока.</span></div>
+        <div class="line"><span>💡 Поток 8 набран на ${Math.round(all[4].a.length / STREAMS[4].plan * 100)}% за 2 недели до старта: рекламу можно не увеличивать.</span></div>
+      </div>
+      <a class="btn btn-teal" href="./" style="text-decoration:none">Хочу такой учёт</a>`;
+  }
+
+  function open(h) { document.getElementById('sheetBox').innerHTML = h; document.getElementById('sheet').classList.add('open'); }
+  document.getElementById('sheet').onclick = e => { if (e.target.id === 'sheet') e.target.classList.remove('open'); };
+  let tab = 'home';
+  const R = { home, students, streams, money };
+  function rerender() { R[tab](); }
+  document.querySelectorAll('.nav button').forEach(b => b.onclick = () => {
+    tab = b.dataset.t; document.querySelectorAll('.nav button').forEach(x => x.classList.toggle('on', x === b));
+    rerender(); window.scrollTo(0, 0);
+  });
+  rerender();
+})();
+</script>
+</body>
+</html>
