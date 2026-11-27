@@ -183,6 +183,8 @@
       <div class="card"><h3>💬 Учитель может отмечать и через бота</h3>
         <div class="bot me">Kids A1: не было Арсена и Камилы</div>
         <div class="bot it">✅ Отметил: Kids A1, 27.11, пришли 5 из 7. У Алихана остался 1 урок по абонементу, напомнить маме об оплате?</div>
+        <div class="bot me">Да</div>
+        <div class="bot it">✅ Отправил маме Алихана в Telegram напоминание и ссылку на оплату Kaspi. Если не оплатит за 2 дня, подскажу написать ей в WhatsApp.</div>
       </div>`;
     document.getElementById('prev').onclick = () => { dayOff--; today(); };
     document.getElementById('next').onclick = () => { dayOff++; today(); };
@@ -236,7 +238,23 @@
       ${!s.paid ? '<button class="btn btn-teal" id="pay">Отметить оплату</button>' : ''}
       <button class="btn btn-ghost" id="rem">${s.paid ? 'Напомнить о продлении' : 'Напомнить об оплате'}</button>`);
     const p = document.getElementById('pay'); if (p) p.onclick = () => { s.paid = true; s.pay = 'Kaspi'; s.left = s.lessons; close(); render(); toast('Оплата отмечена (в демо не сохраняется)'); };
-    document.getElementById('rem').onclick = () => toast('Бот отправит родителю напоминание (в демо не отправляется)');
+    document.getElementById('rem').onclick = () => remind(s, g);
+  }
+  function remind(s, g) {
+    const txt = s.paid ? `Здравствуйте! У ${s.name} остался ${s.left} урок по абонементу «${gname(g)}». Продлить можно по ссылке Kaspi: ${tg(s.sum)}.` : `Здравствуйте! Напоминаем об оплате абонемента «${gname(g)}» для ${s.name}: ${tg(s.sum)}. Оплатить можно по ссылке Kaspi.`;
+    const tgOn = s.id % 3 !== 0;   // в демо часть мам подписана на бота
+    open(`<button class="close" data-x>×</button><h3>Напомнить родителю</h3><div class="muted">${s.name} · ${s.parent || 'ученик взрослый'}</div>
+      <div class="card" style="margin-top:12px"><div class="muted" style="margin-bottom:6px">Текст напоминания</div><div class="bot it" style="margin:0">${txt}</div></div>
+      <div class="card"><h3>1. Telegram, автоматически</h3>
+        ${tgOn ? '<div class="muted">Мама подписана на бота центра. Бот отправит сам, а после оплаты пришлёт «Спасибо, абонемент продлён».</div><button class="btn btn-teal" id="viaTg">Отправить через бота</button>'
+               : '<div class="muted">Мама ещё не подписана на бота. Отправьте ей ссылку или QR-код: один раз нажмёт «Старт», и дальше напоминания будут приходить сами.</div><button class="btn btn-ghost" id="viaTg">Отправить маме ссылку на бота</button>'}
+      </div>
+      <div class="card"><h3>2. WhatsApp, в одно нажатие</h3>
+        <div class="muted">Откроется чат с мамой, текст уже вставлен, остаётся нажать «Отправить».</div>
+        <button class="btn btn-ghost" id="viaWa">Открыть WhatsApp</button>
+      </div>`);
+    document.getElementById('viaTg').onclick = () => { close(); toast(tgOn ? 'Бот отправит напоминание (в демо не отправляется)' : 'Ссылка на бота готова (в демо не отправляется)'); };
+    document.getElementById('viaWa').onclick = () => { close(); toast('Откроется WhatsApp с готовым текстом (в демо не открывается)'); };
   }
 
   // деньги за ноябрь: по каждому человеку
