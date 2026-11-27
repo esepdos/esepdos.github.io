@@ -77,7 +77,7 @@
   <div class="top">
     <div class="row"><a class="back" href="./">‹ О сервисе и цены</a><span class="badge">ДЕМО · данные вымышленные</span></div>
     <div class="ttl" id="ttl">Учебный центр «Bilim»</div>
-    <div class="seg" id="mode"><button data-mode="teach" class="on">Хозяин и учителя</button><button data-mode="part">Трое партнёров</button></div>
+    <div class="seg" id="mode"><button data-mode="teach" class="on">Собственник и учителя</button><button data-mode="part">Трое партнёров</button></div>
     <div class="role" id="roles"></div>
   </div>
   <main id="view"></main>
@@ -100,7 +100,7 @@
   const rnd = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
   const pick = a => a[Math.floor(rnd() * a.length)];
 
-  // люди: в режиме «учителя» это наёмные учителя у хозяина, в режиме «партнёры» трое совладельцев
+  // люди: в режиме «учителя» это наёмные учителя у собственника, в режиме «партнёры» трое совладельцев
   const P = [
     { id: 'a', name: 'Айжан', color: '#1f9e90', subj: 'Английский', pay: 'pct', pct: 0.45 },
     { id: 'm', name: 'Марина', color: '#8a5cc4', subj: 'Английский', pay: 'pct', pct: 0.45 },
@@ -152,7 +152,7 @@
   function head() {
     document.querySelectorAll('#mode button').forEach(b => b.classList.toggle('on', b.dataset.mode === MODE));
     document.getElementById('peopleTab').textContent = MODE === 'part' ? 'Партнёры' : 'Учителя';
-    const r = [['owner', MODE === 'part' ? 'Общий вид' : 'Хозяин'], ...P.map(p => [p.id, (MODE === 'part' ? 'Партнёр ' : 'Учитель ') + p.name])];
+    const r = [['owner', MODE === 'part' ? 'Общий вид' : 'Собственник'], ...P.map(p => [p.id, (MODE === 'part' ? 'Партнёр ' : 'Учитель ') + p.name])];
     document.getElementById('roles').innerHTML = '<span class="muted" style="flex:none">Смотрю как:</span>' + r.map(([k, n]) => `<button class="chip ${ROLE === k ? 'on' : ''}" data-r="${k}">${n}</button>`).join('');
     document.querySelectorAll('[data-r]').forEach(b => b.onclick = () => {
       ROLE = b.dataset.r; gf = 'all'; if (ROLE !== 'owner' && tab === 'money') tab = 'today'; render();
@@ -167,7 +167,7 @@
     const ending = S.filter(s => s.paid && s.left <= 1 && mineG(G.find(g => g.id === s.g)));
     const unpaid = S.filter(s => !s.paid && mineG(G.find(g => g.id === s.g)));
     V.innerHTML = `
-      ${ROLE === 'owner' && dayOff === 0 ? `<div class="note">Так выглядит учёт учебного центра в EsepDos. Вверху переключите «${MODE === 'part' ? 'Трое партнёров' : 'Хозяин и учителя'}» и «Смотрю как». Нажмите на занятие, чтобы отметить, кто пришёл.</div>` : ''}
+      ${ROLE === 'owner' && dayOff === 0 ? `<div class="note">Так выглядит учёт учебного центра в EsepDos. Вверху переключите «${MODE === 'part' ? 'Трое партнёров' : 'Собственник и учителя'}» и «Смотрю как». Нажмите на занятие, чтобы отметить, кто пришёл.</div>` : ''}
       <div class="chips"><button class="chip" id="prev">‹</button><button class="chip on" style="min-width:170px">${dayOff === 0 ? 'Сегодня, ' : ''}${d.getDate()} ${MON[d.getMonth()]}, ${DAYS[d.getDay()]}</button><button class="chip" id="next">›</button></div>
       <div class="tiles">
         <div class="tile ${unpaid.length ? '' : 'hl'}"><div class="l">Не оплатили</div><div class="v ${unpaid.length ? 'neg' : ''}">${unpaid.length}</div><div class="n">${tg(unpaid.reduce((t, s) => t + s.sum, 0))}</div></div>
@@ -289,7 +289,7 @@
     const profit = c.rev - pay - c.common;
     V.innerHTML = `
       <div class="tiles">
-        <div class="tile hl"><div class="l">${MODE === 'part' ? 'Делят партнёры' : 'Осталось хозяину'}</div><div class="v">${tg(profit)}</div><div class="n">за ноябрь</div></div>
+        <div class="tile hl"><div class="l">${MODE === 'part' ? 'Делят партнёры' : 'Осталось собственнику'}</div><div class="v">${tg(profit)}</div><div class="n">за ноябрь</div></div>
         <div class="tile"><div class="l">Учеников</div><div class="v">${S.length}</div><div class="n">${G.length} групп, 3 кабинета</div></div>
       </div>
       <div class="card"><h3>Ноябрь 2026</h3>
@@ -313,7 +313,7 @@
   function open(h) { document.getElementById('sheetBox').innerHTML = h; document.getElementById('sheet').classList.add('open'); document.querySelectorAll('[data-x]').forEach(b => b.onclick = close); }
   function close() { document.getElementById('sheet').classList.remove('open'); }
   document.getElementById('sheet').onclick = e => { if (e.target.id === 'sheet') close(); };
-  document.querySelectorAll('#mode button').forEach(b => b.onclick = () => { MODE = b.dataset.mode; ROLE = 'owner'; gf = 'all'; render(); toast(MODE === 'part' ? 'Трое партнёров, оплата на одно ИП: у каждого свои группы и своя доля' : 'Хозяин нанимает учителей на процент или за урок'); });
+  document.querySelectorAll('#mode button').forEach(b => b.onclick = () => { MODE = b.dataset.mode; ROLE = 'owner'; gf = 'all'; render(); toast(MODE === 'part' ? 'Трое партнёров, оплата на одно ИП: у каждого свои группы и своя доля' : 'Собственник нанимает учителей на процент или за урок'); });
   const R = { today, students, people, money };
   function render() {
     head();
