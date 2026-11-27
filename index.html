@@ -348,7 +348,7 @@
     const range = r => r[0] === r[1] ? n(r[0]) + ' тг' : 'от ' + n(r[0]) + ' до ' + n(r[1]) + ' тг';
     function price() {
       if (A.who === 'self') return { tier: 'Личные финансы', setup: [40000, 60000], month: [20000, 20000], diag: false, text: 'Личные финансы, главное: ' + lab('selfkind') };
-      let lvl = (+A.turn === 0 && +A.points === 1) ? 0 : Math.max(+A.turn, +A.points);
+      let lvl = +A.turn === 0 ? (+A.points === 1 ? 0 : 1) : Math.max(+A.turn, +A.points);
       if (A.sphere === 'opt' || A.soft === '1c') lvl = Math.max(lvl, 2);
       if (A.sphere === 'opt' && +A.turn === 3) lvl = 3;
       const T = { 0: ['Тариф «Старт»', [50000, 50000], [40000, 40000]], 1: ['Малый бизнес', [100000, 150000], [100000, 150000]], 2: ['Бизнес с несколькими точками', [150000, 250000], [150000, 250000]], 3: ['Средний бизнес', [300000, 500000], [300000, 400000]] }[lvl];
