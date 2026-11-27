@@ -111,9 +111,9 @@
   </div>
   <div class="promo">✨ Это пример. Под ваш бизнес сделаем свою версию: ваши статьи, отчёты и нужные именно вам функции.</div>
   <div class="intro" id="intro">
-    <div class="wow"><b>🔎 Находка этого месяца</b>11 декабря не хватит 5,7 млн ₸ на предоплату импорта. Нажмите в красной плашке, как закрыть разрыв, и посмотрите, как меняется календарь.</div>
+    <div class="wow"><b>🔎 Находка этого месяца</b>Через 14 дней (11 декабря) не хватит 5,7 млн ₸ на предоплату импорта. Финансист посчитал 4 способа закрыть разрыв с ценой каждого и рекомендует план без кредита.</div>
     <div class="ba"><div><b>Было</b>тетрадь, Excel, выписки в WhatsApp, прибыль «на глаз»</div><div><b>Стало</b>всё в одном приложении, прибыль и прогноз денег, финансист проверяет</div></div>
-    <div class="tour"><div class="th"><span>Что посмотреть за 1 минуту</span><span id="tourN">0 из 3</span></div><ul><li data-i="0">Закройте кассовый разрыв кнопками в красной плашке</li><li data-i="1">Откройте «Долги» и «Мы должны»</li><li data-i="2">Откройте «Отчёты» и «ДДС»</li></ul></div>
+    <div class="tour"><div class="th"><span>Что посмотреть за 1 минуту</span><span id="tourN">0 из 3</span></div><ul><li data-i="0">Примите план финансиста в красной плашке</li><li data-i="1">Откройте «Долги» и «Мы должны»</li><li data-i="2">Откройте «Отчёты» и «ДДС»</li></ul></div>
     <div class="finq"><div class="av">А</div><div style="flex:1"><small>Вопрос от вашего финансиста Алии</small>Платёж 1,3 млн ₸ ТК «Жол» на 08.12: логистика за ноябрь или аванс за декабрь?</div><button id="finAns">Ответить</button></div>
     <button class="hide" id="introHide">Скрыть подсказки</button>
   </div>
@@ -169,7 +169,15 @@
   ];
   const IMPORT = { n: 'Импорт: предоплата поставщику (Китай)', s: 22000000, d: D(12, 11) };
   const DAILY = [0, 700000, 750000, 650000, 800000, 700000, 600000];
-  const FIX = { local: false, mega: false, od: false };
+  const FIX = { local: false, mega: false, od: false, stock: false, early: false };
+  let PLAN = false;
+  // Варианты закрыть разрыв: от самого дешёвого к самому дорогому
+  const OPTS = [
+    { k: 'local', t: 'Перенести оплату «Поставщик-Алматы» с 01.12 на 16.12', why: 'по договору у них отсрочка до 30 дней', gives: 7200000, cost: 0, task: 'Коммерческому директору: договориться с «Поставщик-Алматы» о переносе оплаты до 01.12' },
+    { k: 'stock', t: 'Распродать неликвид: стройматериалы лежат 120 дней на 8 млн', why: 'половину со скидкой 15% до 08.12', gives: 4000000, cost: 600000, task: 'Менеджеру Айбеку: акция на стройматериалы до 08.12' },
+    { k: 'early', t: 'Скидка 2% «Юг-Дистрибуции» за оплату 10.12 вместо 14.12', why: '9,4 млн придут на 4 дня раньше', gives: 9212000, cost: 188000, task: 'Менеджеру Гульмире: предложить «Юг-Дистрибуции» скидку 2% за оплату 10.12' },
+    { k: 'od', t: 'Овердрафт Halyk на 10 дней', why: 'крайний вариант, решение за собственником', gives: 6000000, cost: 50000, task: 'Собственнику: решить по овердрафту в Halyk' },
+  ];
   const apTotal = () => AP.reduce((t, g) => t + g.items.reduce((s, i) => s + (i[0].includes('из остатка') ? 0 : i[1]), 0), 0);
 
   function flows() {
@@ -185,7 +193,9 @@
     let bal = START;
     for (let k = 0; k <= 34; k++) {
       const d = new Date(TODAY); d.setDate(d.getDate() + k);
-      const ins = AR.filter(a => a.plan && +a.plan === +d).map(a => ({ n: a.n, s: a.sum, c: 'Оплата покупателя (1210)' }));
+      const ins = AR.filter(a => { const pd = FIX.early && a.n.includes('Юг-Дистрибуция') ? D(12, 10) : a.plan; return pd && +pd === +d; })
+        .map(a => FIX.early && a.n.includes('Юг-Дистрибуция') ? { n: a.n + ' (раньше, со скидкой 2%)', s: Math.round(a.sum * 0.98), c: 'Оплата покупателя (1210)' } : { n: a.n, s: a.sum, c: 'Оплата покупателя (1210)' });
+      if (FIX.stock && +d === +D(12, 8)) ins.push({ n: 'Распродажа неликвида: стройматериалы', s: 4000000, c: 'Продажи со скидкой 15%' });
       if (FIX.mega && +d === +D(12, 10)) ins.push({ n: 'ТОО «Мега Строй» (после напоминания)', s: 3200000, c: 'Оплата покупателя (1210)' });
       if (FIX.od && +d === +D(12, 10)) ins.push({ n: 'Овердрафт Halyk на 10 дней', s: 6000000, c: 'Кредит' });
       if (k > 0 && DAILY[d.getDay()]) ins.push({ n: 'Текущие продажи', s: DAILY[d.getDay()], c: 'Продажи без отсрочки' });
@@ -226,17 +236,34 @@
 
   function gap(days) {
     const worst = days.reduce((a, b) => b.bal < a.bal ? b : a);
-    const done = [FIX.local && '✓ С «Поставщик-Алматы» договорились оплатить 7,2 млн 16.12', FIX.mega && '✓ «Мега Строй» напомнили, обещают оплатить 10.12', FIX.od && '✓ Овердрафт Halyk 6 млн на 10 дней (проценты около 50 тыс.)'].filter(Boolean);
-    const opts = `${!FIX.local ? '<button class="btn btn-teal" data-fix="local">Договориться с «Поставщик-Алматы»: оплатить 7,2 млн 16.12, а не 01.12</button>' : ''}
-      ${!FIX.mega ? '<button class="btn btn-ghost" data-fix="mega">Взыскать долг «Мега Строй» 3,2 млн (просрочка 38 дней)</button>' : ''}
-      ${!FIX.od ? '<button class="btn btn-ghost" data-fix="od">Открыть овердрафт Halyk 6 млн на 10 дней</button>' : ''}`;
-    const list = done.length ? `<div style="margin-top:8px">${done.map(t => `<span class="done">${t}</span>`).join('')}</div>` : '';
-    if (worst.bal >= MINCASH) return `<div class="alert ok"><b>✅ Денег хватает на все платежи до ${ds(days[days.length - 1].d)}</b>Минимальный остаток ${mln(worst.bal)} (${dn(worst.d)}).${list}</div>`;
+    const inDays = Math.round((worst.d - TODAY) / 864e5);
+    const chosen = OPTS.filter(o => FIX[o.k]);
+    const cost = chosen.reduce((a, o) => a + o.cost, 0);
+    const money = v => v ? (v >= 1e6 ? mln(v) : '≈ ' + Math.round(v / 1000) + ' тыс.') : '0 ₸';
+    const extra = FIX.mega ? '<span class="done">✓ «Мега Строй» напомнили о долге 3,2 млн, обещают оплатить 10.12</span>' : '';
+    if (worst.bal >= MINCASH) {
+      return `<div class="alert ok"><b>✅ Денег хватает на все платежи до ${ds(days[days.length - 1].d)}</b>Минимальный остаток ${mln(worst.bal)} (${dn(worst.d)}).
+        ${chosen.length ? `<div style="margin-top:8px">${chosen.map(o => `<span class="done">✓ ${o.t}: стоит ${money(o.cost)}</span>`).join('')}${extra}<span class="done"><b style="display:inline;font-size:14px">Стоимость плана: ${money(cost)}</b>${FIX.od ? '' : ', без кредита'}</span></div>` : extra}
+        ${PLAN ? `<div style="margin-top:10px;padding-top:8px;border-top:1px solid rgba(0,0,0,.08)"><b style="font-size:14px">Задачи разосланы:</b>${chosen.map(o => `<span class="done">📌 ${o.task}</span>`).join('')}</div>` : ''}</div>`;
+    }
     const neg = worst.bal < 0;
-    return `<div class="alert ${neg ? '' : 'mid'}"><b>⚠️ ${dn(worst.d)}: ${neg ? 'не хватит ' + mln(-worst.bal) : 'остаток всего ' + mln(worst.bal) + ', ниже неснижаемого'}</b>
-      ${neg ? 'В этот день предоплата импорта 22 млн по контракту, её не перенести. А крупные покупатели платят позже. Что можно сделать:' : 'Стало лучше, но запаса мало. Ещё можно:'}${list}${opts}</div>`;
+    return `<div class="alert ${neg ? '' : 'mid'}"><b>⚠️ Через ${inDays} ${inDays % 10 === 1 && inDays !== 11 ? 'день' : inDays % 10 >= 2 && inDays % 10 <= 4 && (inDays < 12 || inDays > 14) ? 'дня' : 'дней'} (${dn(worst.d)}) ${neg ? 'не хватит ' + mln(-worst.bal) : 'останется всего ' + mln(worst.bal) + ', ниже неснижаемого'}</b>
+      Предоплату импорта 22 млн по контракту не перенести. Финансист посчитал варианты, от самого дешёвого:
+      <div style="background:#fff;border-radius:12px;padding:4px 10px;margin:10px 0;color:var(--ink)">
+        ${OPTS.map(o => `<div style="display:flex;gap:8px;align-items:center;padding:8px 0;border-top:1px solid var(--line)${o.k === 'local' ? ';border-top:0' : ''}">
+          <div style="flex:1;min-width:0"><div style="font-weight:600;font-size:14px${o.k === 'od' ? ';color:var(--hint)' : ''}">${o.t}</div><div class="muted" style="font-size:12px">${o.why}</div>
+            <div style="font-size:13px;margin-top:2px"><span class="pos">+${mln(o.gives)}</span> · стоит <b>${money(o.cost)}</b></div></div>
+          <button class="chip ${FIX[o.k] ? 'on' : ''}" data-opt="${o.k}" style="flex:none">${FIX[o.k] ? '✓ в плане' : 'Добавить'}</button></div>`).join('')}
+      </div>
+      <div style="background:rgba(255,255,255,.6);border-radius:12px;padding:10px;font-size:14px;color:var(--ink)"><b style="display:block;font-size:14px;margin-bottom:2px">💡 Рекомендую</b>Перенос оплаты поставщику (бесплатно) и распродажу неликвида (около 600 тыс.). Этого хватает с запасом, кредит не нужен. Если «Поставщик-Алматы» откажет: скидка «Юг-Дистрибуции», это дешевле кредита.</div>
+      ${extra ? `<div style="margin-top:6px">${extra}</div>` : ''}
+      <button class="btn btn-teal" id="planOk">Принять план финансиста</button></div>`;
   }
-  function bindGap() { document.querySelectorAll('[data-fix]').forEach(b => b.onclick = () => { FIX[b.dataset.fix] = true; render(); toast('Платёжный календарь пересчитан'); }); }
+  function bindGap() {
+    document.querySelectorAll('[data-opt]').forEach(b => b.onclick = () => { FIX[b.dataset.opt] = !FIX[b.dataset.opt]; render(); toast('Платёжный календарь пересчитан'); });
+    const ok = document.getElementById('planOk');
+    if (ok) ok.onclick = () => { FIX.local = true; FIX.stock = true; PLAN = true; render(); toast('План принят, задачи отправлены ответственным (в демо не отправляются)'); };
+  }
 
   function howWeWork() {
     return `<div class="card"><h3>Как можем работать</h3>
