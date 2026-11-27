@@ -40,15 +40,24 @@
   .res{background:var(--tealbg);border-radius:10px;padding:8px 10px;color:#1d4a45}
   .btn{display:block;text-align:center;text-decoration:none;font-weight:700;font-size:17px;padding:16px 14px;border-radius:14px;border:0;cursor:pointer;font-family:inherit;width:100%}
   .btn-gold{background:var(--gold);color:#1a1a1a;box-shadow:0 6px 18px rgba(244,197,66,.35)}
-  .calc .q{margin-bottom:14px}
-  .calc .q b{display:block;margin-bottom:8px;font-size:16px}
-  .calc .opts{display:flex;flex-wrap:wrap;gap:8px}
-  .calc .opts button{font:inherit;font-size:14px;padding:9px 13px;border-radius:12px;border:1.5px solid var(--line);background:#fff;cursor:pointer;color:var(--ink)}
-  .calc .opts button.on{background:var(--teal);border-color:var(--teal);color:#fff}
-  .calc .res{background:var(--tealbg);border-radius:14px;padding:14px;margin-top:6px}
-  .calc .res .big{font-size:20px;font-weight:800;margin:2px 0 8px}
-  .calc .res .row{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-top:1px solid rgba(0,0,0,.06);font-size:15px}
-  .calc .res .row:first-of-type{border-top:0}
+  .cm{position:fixed;inset:0;background:rgba(18,22,28,.5);z-index:50;display:flex;align-items:center;justify-content:center;padding:14px}
+  .cm[hidden]{display:none}
+  .cm-box{background:#fff;width:100%;max-width:460px;max-height:92vh;overflow:auto;border-radius:20px;padding:20px 18px 16px;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+  .cm-x{position:absolute;top:10px;right:10px;border:0;background:#f1f3f5;border-radius:999px;width:34px;height:34px;font-size:20px;cursor:pointer}
+  .cm-head{display:flex;flex-direction:column;gap:2px;margin-bottom:10px;padding-right:40px}
+  .cm-head b{font-size:18px}
+  .cm-bar{height:6px;background:var(--line);border-radius:99px;overflow:hidden;margin-bottom:16px}
+  .cm-bar i{display:block;height:100%;width:0;background:var(--teal);transition:width .25s}
+  .cm-q{font-size:19px;font-weight:700;margin:0 0 12px;line-height:1.3}
+  .cm-opts{display:flex;flex-direction:column;gap:8px}
+  .cm-opts button{font:inherit;font-size:16px;text-align:left;padding:13px 14px;border-radius:14px;border:1.5px solid var(--line);background:#fff;cursor:pointer;color:var(--ink)}
+  .cm-opts button:hover{border-color:var(--teal)}
+  .cm-back{margin-top:12px;border:0;background:none;color:var(--teal);font:inherit;font-weight:600;cursor:pointer;padding:6px 0}
+  .cm-res .big{font-size:22px;font-weight:800;margin:2px 0 10px}
+  .cm-res .row{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid var(--line);font-size:15px}
+  .cm-res .row:first-of-type{border-top:0}
+  .cm-res .row b{white-space:nowrap}
+  .cm-res .gift{background:#fff6d6;border:1.5px solid #f4c542;border-radius:12px;padding:9px 12px;font-weight:700;margin:10px 0}
   .final .btn-ghost{margin-top:10px}
 
   .btn-teal{background:var(--teal);color:#fff;margin-top:10px}
@@ -207,20 +216,6 @@
     <div class="review"><p id="reviewText"></p><b id="reviewWho"></b></div>
   </section>
 
-  <section id="calc">
-    <h2>Рассчитать стоимость</h2>
-    <p class="muted" style="margin-top:-6px">5 коротких вопросов, и вы сразу увидите примерную цену. Точную назовём после разговора.</p>
-    <div class="card calc" id="calcBox">
-      <div class="q" data-q="who"><b>1. Для кого учёт?</b><div class="opts"><button data-v="biz">Бизнес</button><button data-v="self">Личные финансы</button></div></div>
-      <div class="q biz" data-q="sphere"><b>2. Чем занимаетесь?</b><div class="opts"><button data-v="services">Услуги: салон, студия, клиника</button><button data-v="edu">Обучение: центр, курсы</button><button data-v="trade">Торговля: магазин, Kaspi</button><button data-v="opt">Опт, дистрибуция, производство</button></div></div>
-      <div class="q biz" data-q="turn"><b>3. Оборот в месяц?</b><div class="opts"><button data-v="1">до 5 млн</button><button data-v="2">5-20 млн</button><button data-v="3">больше 20 млн</button></div></div>
-      <div class="q biz" data-q="points"><b>4. Сколько точек или направлений?</b><div class="opts"><button data-v="1">1</button><button data-v="2">2-3</button><button data-v="3">4 и больше</button></div></div>
-      <div class="q biz" data-q="soft"><b>5. Где сейчас ведёте учёт?</b><div class="opts"><button data-v="none">Нигде или в тетради</button><button data-v="excel">Excel</button><button data-v="altegio">Altegio, YCLIENTS и т.п.</button><button data-v="1c">1С</button></div></div>
-      <div class="q self" data-q="selfkind" hidden><b>2. Что важнее всего?</b><div class="opts"><button data-v="where">Понять, куда уходят деньги</button><button data-v="debt">Кредиты и долги</button><button data-v="save">Начать копить</button></div></div>
-      <div id="calcRes" hidden></div>
-    </div>
-  </section>
-
   <section id="price">
     <h2>Сколько стоит</h2>
     <div class="prices"><div class="card" style="border:2px solid var(--teal)">
@@ -301,6 +296,16 @@
     <a class="btn btn-ghost" href="#" data-cta>Написать в Telegram</a>
   </div>
 </main>
+<div class="cm" id="calcModal" hidden>
+  <div class="cm-box">
+    <button class="cm-x" id="cmClose" aria-label="Закрыть">×</button>
+    <div class="cm-head"><b>Рассчитать стоимость</b><span class="muted" id="cmStep"></span></div>
+    <div class="cm-bar"><i id="cmBar"></i></div>
+    <div id="cmBody"></div>
+    <button class="cm-back" id="cmBack" hidden>‹ Назад</button>
+  </div>
+</div>
+
 
 <footer>EsepDos · финансы с Арайлым · 2026</footer>
 
@@ -322,53 +327,65 @@
     document.getElementById('review').hidden = false;
   }
 
-  // Калькулятор стоимости: примерная цена по ответам, заявка уходит в Telegram с ответами
+  // Калькулятор стоимости в отдельном окне: вопросы по одному, в конце расчёт и кнопка в Telegram
   (function () {
-    const box = document.getElementById('calcBox'), res = document.getElementById('calcRes');
-    const A = {};
-    const L = {
-      sphere: { services: 'услуги', edu: 'обучение', trade: 'торговля', opt: 'опт, дистрибуция, производство' },
-      turn: { 1: 'до 5 млн', 2: '5-20 млн', 3: 'больше 20 млн' }, points: { 1: '1', 2: '2-3', 3: '4 и больше' },
-      soft: { none: 'нигде или в тетради', excel: 'Excel', altegio: 'Altegio, YCLIENTS или похожая программа', '1c': '1С' },
-      selfkind: { where: 'понять, куда уходят деньги', debt: 'кредиты и долги', save: 'начать копить' } };
+    const M = document.getElementById('calcModal'), B = document.getElementById('cmBody'), BAR = document.getElementById('cmBar'), ST = document.getElementById('cmStep'), BACK = document.getElementById('cmBack');
+    const Q = {
+      who: ['Для кого учёт?', [['biz', 'Бизнес'], ['self', 'Личные финансы']]],
+      sphere: ['Чем занимаетесь?', [['services', 'Услуги: салон, студия, клиника'], ['edu', 'Обучение: центр, курсы'], ['trade', 'Торговля: магазин, Kaspi'], ['opt', 'Опт, дистрибуция, производство']]],
+      turn: ['Оборот в месяц?', [['0', 'до 1 млн'], ['1', '1-5 млн'], ['2', '5-20 млн'], ['3', 'больше 20 млн']]],
+      points: ['Сколько точек или направлений?', [['1', '1'], ['2', '2-3'], ['3', '4 и больше']]],
+      soft: ['Где сейчас ведёте учёт?', [['none', 'Нигде или в тетради'], ['excel', 'Excel'], ['altegio', 'Altegio, YCLIENTS или похожая программа'], ['1c', '1С']]],
+      selfkind: ['Что для вас важнее всего?', [['where', 'Понять, куда уходят деньги'], ['debt', 'Кредиты и долги'], ['save', 'Начать копить']]],
+    };
+    const ORDER = { biz: ['who', 'sphere', 'turn', 'points', 'soft'], self: ['who', 'selfkind'] };
+    let A = {}, i = 0;
+    const seq = () => ORDER[A.who || 'biz'];
+    const lab = k => Q[k][1].find(o => o[0] === A[k])[1].toLowerCase();
     const n = v => v.toLocaleString('ru-RU').replace(/,/g, ' ');
-    function calc() {
-      if (A.who === 'self') {
-        if (!A.selfkind) return null;
-        return { tier: 'Личные финансы', setup: [40000, 60000], month: [20000, 20000], gift: true, diag: false,
-          text: 'Личные финансы, главное: ' + L.selfkind[A.selfkind] };
-      }
-      if (!A.sphere || !A.turn || !A.points || !A.soft) return null;
+    const range = r => r[0] === r[1] ? n(r[0]) + ' тг' : 'от ' + n(r[0]) + ' до ' + n(r[1]) + ' тг';
+    function price() {
+      if (A.who === 'self') return { tier: 'Личные финансы', setup: [40000, 60000], month: [20000, 20000], diag: false, text: 'Личные финансы, главное: ' + lab('selfkind') };
       let lvl = Math.max(+A.turn, +A.points);
       if (A.sphere === 'opt' || A.soft === '1c') lvl = Math.max(lvl, 2);
       if (A.sphere === 'opt' && +A.turn === 3) lvl = 3;
-      const T = { 1: ['Малый бизнес', [100000, 150000], [100000, 150000], true], 2: ['Бизнес с несколькими точками', [150000, 250000], [150000, 250000], true], 3: ['Средний бизнес', [300000, 500000], [300000, 400000], true] }[lvl];
-      return { tier: T[0], setup: T[1], month: T[2], gift: T[3], diag: true,
-        text: 'Бизнес: ' + L.sphere[A.sphere] + ', оборот ' + L.turn[A.turn] + ', точек ' + L.points[A.points] + ', учёт: ' + L.soft[A.soft] };
+      const T = { 0: ['Малый бизнес', [100000, 100000], [100000, 100000]], 1: ['Малый бизнес', [100000, 150000], [100000, 150000]], 2: ['Бизнес с несколькими точками', [150000, 250000], [150000, 250000]], 3: ['Средний бизнес', [300000, 500000], [300000, 400000]] }[lvl];
+      return { tier: T[0], setup: T[1], month: T[2], diag: true, text: 'Бизнес: ' + lab('sphere') + ', оборот ' + lab('turn') + ', точек ' + lab('points') + ', учёт: ' + lab('soft') };
     }
-    function range(r) { return r[0] === r[1] ? n(r[0]) + ' тг' : 'от ' + n(r[0]) + ' до ' + n(r[1]) + ' тг'; }
-    function render() {
-      box.querySelectorAll('.biz').forEach(q => q.hidden = A.who === 'self');
-      box.querySelectorAll('.self').forEach(q => q.hidden = A.who !== 'self');
-      const r = calc();
-      if (!r) { res.hidden = true; return; }
+    function show() {
+      const s = seq();
+      BACK.hidden = i === 0;
+      if (i < s.length) {
+        const k = s[i], q = Q[k];
+        ST.textContent = 'Вопрос ' + (i + 1) + ' из ' + s.length;
+        BAR.style.width = (i / s.length * 100) + '%';
+        B.innerHTML = '<p class="cm-q">' + q[0] + '</p><div class="cm-opts">' + q[1].map(o => '<button data-v="' + o[0] + '">' + o[1] + '</button>').join('') + '</div>';
+        B.querySelectorAll('button').forEach(b => b.onclick = () => { A[k] = b.dataset.v; if (k === 'who') A = { who: A.who }; i++; show(); });
+        return;
+      }
+      const r = price();
+      ST.textContent = 'Ваш расчёт';
+      BAR.style.width = '100%';
       const msg = 'Здравствуйте! Рассчитал(а) стоимость на сайте. ' + r.text + '. Примерно: внедрение ' + range(r.setup) + ', сопровождение ' + range(r.month) + ' в месяц. Хочу обсудить.';
-      res.hidden = false;
-      res.innerHTML = '<div class="res"><div class="muted">Ваш вариант</div><div class="big">' + r.tier + '</div>' +
+      B.innerHTML = '<div class="cm-res"><div class="muted">Ваш вариант</div><div class="big">' + r.tier + '</div>' +
         (r.diag ? '<div class="row"><span>Первый шаг: диагностика за неделю</span><b>50 000 тг</b></div>' : '') +
         '<div class="row"><span>Внедрение</span><b>' + range(r.setup) + '</b></div>' +
         '<div class="row"><span>Сопровождение в месяц</span><b>' + range(r.month) + '</b></div>' +
-        (r.gift ? '<div class="row"><span>🎁 До 31 декабря</span><b>первый месяц в подарок</b></div>' : '') +
-        (r.diag ? '<p class="muted" style="margin:8px 0 0;font-size:13px">Диагностика засчитывается во внедрение, если продолжаем.</p>' : '') +
-        '<p class="muted" style="margin:8px 0 0;font-size:13px">Это примерная цена. Точную назовём после короткого разговора, без вашего согласия она не меняется.</p>' +
-        '<a class="btn btn-gold" style="margin-top:12px" target="_blank" rel="noopener" href="' + CONTACT + '?text=' + encodeURIComponent(msg) + '">Отправить расчёт в Telegram</a></div>';
+        '<div class="gift">🎁 До 31 декабря первый месяц сопровождения в подарок</div>' +
+        (r.diag ? '<p class="muted" style="margin:0 0 6px;font-size:13px">Диагностика засчитывается во внедрение, если продолжаем.</p>' : '') +
+        '<p class="muted" style="margin:0;font-size:13px">Это примерная цена. Точную назовём после короткого разговора, без вашего согласия она не меняется.</p>' +
+        '<a class="btn btn-gold" style="margin-top:14px" target="_blank" rel="noopener" href="' + CONTACT + '?text=' + encodeURIComponent(msg) + '">Хочу так, написать в Telegram</a>' +
+        '<button class="btn btn-ghost" id="cmAgain" style="margin-top:8px">Пересчитать</button></div>';
+      document.getElementById('cmAgain').onclick = () => { A = {}; i = 0; show(); };
     }
-    box.querySelectorAll('.q').forEach(q => q.querySelectorAll('button').forEach(b => b.onclick = () => {
-      A[q.dataset.q] = b.dataset.v;
-      q.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
-      render();
-      if (!res.hidden) res.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }));
+    BACK.onclick = () => { if (i > 0) { i--; show(); } };
+    function open(e) { if (e) e.preventDefault(); A = {}; i = 0; show(); M.hidden = false; document.body.style.overflow = 'hidden'; }
+    function close() { M.hidden = true; document.body.style.overflow = ''; }
+    document.getElementById('cmClose').onclick = close;
+    M.onclick = e => { if (e.target === M) close(); };
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && !M.hidden) close(); });
+    document.querySelectorAll('a[href="#calc"]').forEach(a => a.onclick = open);
+    if (location.hash === '#calc') open();
   })();
 </script>
 </body>
