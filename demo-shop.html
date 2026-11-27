@@ -1714,6 +1714,7 @@ function renderAn() {
   const B = bizItems(REP);
   if (!B) { $app.innerHTML = anHead() + '<div class="card muted">Фактических данных пока нет.</div>'; return; }
   const { R, m, i, F, items, rc, mg, L } = B;
+  const sg = v => (v > 0 ? '+' : '') + v + '%';
   const col = { bad: 'var(--bad)', warn: 'var(--warn)', ok: 'var(--ok)' };
   const card = x => `<div style="display:flex;gap:10px;padding:8px 0;border-top:1px solid var(--line)"><span class="dot" style="background:${col[x.c]};margin-top:6px;flex:none"></span><div style="flex:1;min-width:0"><div class="row"><b>${esc(x.t)}</b><b style="color:${col[x.c]};white-space:nowrap">${x.v}</b></div><div class="muted">${x.d}</div></div></div>`;
   const bad = items.filter(x => x.c !== 'ok'), good = items.filter(x => x.c === 'ok');
