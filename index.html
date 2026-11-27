@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>EsepDos · финансы с Арайлым</title>
+<meta name="description" content="Учёт денег бизнеса и семьи в Telegram. Вы отправляете чеки боту, бухгалтер ведёт учёт и раз в месяц показывает, сколько заработали и куда ушли деньги.">
+<meta property="og:title" content="EsepDos · финансы с Арайлым">
+<meta property="og:description" content="Деньги бизнеса и семьи под контролем. Чеки боту в Telegram, учёт ведёт живой финансист.">
+<style>
+  :root{--teal:#1f9e90;--teal2:#2bb3a3;--tealbg:#e8f6f4;--gold:#f4c542;--ink:#12161c;--hint:#5b6470;--line:#e4e7eb;--bg:#f6f7f9;--card:#fff}
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--ink);background:var(--bg);line-height:1.5;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:560px;margin:0 auto;padding:0 18px}
+  header{position:sticky;top:0;z-index:10;background:rgba(246,247,249,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  header .wrap{display:flex;align-items:center;justify-content:space-between;height:58px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit}
+  .mark{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#2fd1b2,#0f8a7d);color:#fff;font-weight:800;font-size:19px;display:flex;align-items:center;justify-content:center}
+  .brand b{display:block;font-size:17px;line-height:1.1}
+  .brand small{display:block;font-size:12px;color:var(--hint)}
+  .hbtn{font-size:14px;font-weight:600;color:var(--teal);text-decoration:none;padding:8px 12px;border-radius:10px;background:var(--tealbg)}
+  section{padding:34px 0 6px}
+  h1{font-size:31px;line-height:1.15;margin:0 0 14px;letter-spacing:-.01em}
+  h2{font-size:23px;line-height:1.2;margin:0 0 14px}
+  .lead{font-size:17px;color:#2b323b;margin:0 0 22px}
+  .muted{color:var(--hint)}
+  .who{font-size:16px;font-weight:600;color:#2b323b;margin:0 0 10px}
+  .safe{font-size:14px;color:var(--hint);margin:12px 0 0}
+  h3.sub{font-size:19px;margin:26px 0 12px}
+  .kind{display:inline-block;font-size:12px;font-weight:700;color:var(--teal);background:var(--tealbg);padding:3px 10px;border-radius:999px;margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em}
+  .inc,.res{margin:0 0 8px;font-size:14px;color:#3a424c}
+  .item{border-bottom:1px solid var(--line);padding:10px 0}
+  .item:last-child{border-bottom:0}
+  .item .row{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+  .item p{margin:4px 0 0;font-size:14px;color:var(--hint)}
+  .res{background:var(--tealbg);border-radius:10px;padding:8px 10px;color:#1d4a45}
+  .btn{display:block;text-align:center;text-decoration:none;font-weight:700;font-size:17px;padding:16px 14px;border-radius:14px;border:0;cursor:pointer;font-family:inherit;width:100%}
+  .btn-gold{background:var(--gold);color:#1a1a1a;box-shadow:0 6px 18px rgba(244,197,66,.35)}
+  .btn-teal{background:var(--teal);color:#fff;margin-top:10px}
+  .btn-ghost{background:var(--card);color:var(--teal);border:1.5px solid var(--teal);margin-top:10px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:12px}
+  .name-note{display:flex;gap:10px;align-items:center;background:var(--tealbg);border-radius:14px;padding:12px 14px;font-size:14px;color:#1d4a45;margin-top:18px}
+  .me{display:flex;gap:14px;align-items:center;margin-bottom:12px}
+  .ava{width:76px;height:76px;border-radius:50%;flex:none;object-fit:cover;background:linear-gradient(135deg,#2fd1b2,#0f8a7d);color:#fff;font-size:32px;font-weight:700;display:flex;align-items:center;justify-content:center}
+  .me b{font-size:19px;display:block}
+  ul.facts{list-style:none;padding:0;margin:0}
+  ul.facts li{padding:8px 0 8px 28px;position:relative;border-top:1px solid var(--line)}
+  ul.facts li:first-child{border-top:0}
+  ul.facts li::before{content:'✓';position:absolute;left:4px;color:var(--teal);font-weight:700}
+  .split{display:grid;grid-template-columns:1fr;gap:10px}
+  .role{display:flex;gap:12px;align-items:flex-start}
+  .role .ic{font-size:26px;line-height:1}
+  .role b{display:block}
+  .gets{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .get{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px}
+  .get .ic{font-size:24px}
+  .get.wide{grid-column:1/-1;background:var(--tealbg);border-color:#cdeae6}
+  .get b{display:block;margin:6px 0 2px;font-size:15px;line-height:1.25}
+  .get span{font-size:13px;color:var(--hint);line-height:1.35;display:block}
+  ol.steps{list-style:none;counter-reset:s;padding:0;margin:0}
+  ol.steps li{counter-increment:s;position:relative;padding:0 0 16px 46px}
+  ol.steps li::before{content:counter(s);position:absolute;left:0;top:0;width:32px;height:32px;border-radius:50%;background:var(--teal);color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center}
+  ol.steps b{display:block}
+  .demo{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin-bottom:10px}
+  .demo .ic{font-size:28px}
+  .demo b{display:block;font-size:16px}
+  .demo span{font-size:13px;color:var(--hint);display:block;line-height:1.35}
+  .demo .arr{margin-left:auto;color:var(--teal);font-size:26px}
+  .review{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:16px;padding:18px}
+  .review p{margin:0 0 10px;font-size:16px}
+  table{width:100%;border-collapse:collapse;font-size:15px}
+  td{padding:8px 0;border-bottom:1px solid var(--line);vertical-align:top}
+  td:last-child{text-align:right;white-space:nowrap;font-weight:700;padding-left:10px}
+  .old{text-decoration:line-through;color:var(--hint);font-weight:400;font-size:13px}
+  .sale{display:inline-block;margin-left:6px;background:var(--gold);color:#1a1a1a;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;vertical-align:middle}
+  td[colspan]{text-align:left;white-space:normal;padding-top:14px;font-weight:700;color:var(--teal)}
+  h3{font-size:17px;margin:4px 0 6px}
+  details{background:var(--card);border:1px solid var(--line);border-radius:14px;margin-bottom:8px;padding:0 16px}
+  summary{list-style:none;cursor:pointer;padding:15px 26px 15px 0;font-weight:600;position:relative}
+  summary::-webkit-details-marker{display:none}
+  summary::after{content:'+';position:absolute;right:0;top:50%;transform:translateY(-50%);font-size:24px;color:var(--teal);font-weight:400}
+  details[open] summary::after{content:'−'}
+  details .b{padding:0 0 15px;color:#3a424c;font-size:15px}
+  .final{background:linear-gradient(135deg,#0f8a7d,#1f9e90);color:#fff;border-radius:22px;padding:24px 20px;margin:26px 0 10px}
+  .final h2{color:#fff}
+  .final p{color:#d9f3ef;margin:0 0 18px}
+  footer{padding:20px 0 40px;font-size:13px;color:var(--hint);text-align:center}
+  @media (min-width:600px){h1{font-size:38px}.split{grid-template-columns:1fr 1fr}}
+  .hero-pic{display:none}
+  @media (min-width:960px){
+    .wrap{max-width:1120px;padding:0 32px}
+    section{padding:56px 0 8px}
+    h1{font-size:50px}
+    h2{font-size:30px;margin-bottom:20px}
+    .lead{font-size:19px;max-width:560px}
+    .hero{display:grid;grid-template-columns:1.15fr .85fr;gap:48px;align-items:center;padding-top:64px}
+    .hero-btns{display:flex;gap:12px;max-width:560px}
+    .hero-btns .btn{margin-top:0}
+    .hero-pic{display:flex;justify-content:center}
+    .phone{width:300px;border-radius:40px;border:10px solid #12161c;overflow:hidden;box-shadow:0 30px 60px rgba(18,22,28,.22);background:#12161c}
+    .phone img{display:block;width:100%}
+    .two{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+    .gets{grid-template-columns:repeat(4,1fr);gap:14px}
+    .get{padding:18px}
+    ol.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+    ol.steps li{padding:46px 0 0 0}
+    .demos{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+    .demo{margin-bottom:0;height:100%}
+    .prices{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:16px;align-items:start}
+    .faq{display:grid;grid-template-columns:1fr 1fr;gap:0 14px;align-items:start}
+    .final{text-align:center;padding:40px}
+    .final .btn{max-width:420px;margin:0 auto}
+  }
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <a class="brand" href="#"><div class="mark">E</div><div><b>EsepDos</b><small>финансы с Арайлым</small></div></a>
+  <a class="hbtn" href="#demo">Демо</a>
+</div></header>
+
+<main class="wrap">
+  <section class="hero"><div class="hero-txt">
+    <div style="color:var(--teal);font-weight:700;font-size:15px;margin-bottom:8px">EsepDos · учёт денег</div>
+    <h1>Деньги бизнеса и семьи под контролем</h1>
+    <p class="who">Для владельцев салонов, студий, магазинов и для семей, которые хотят знать, сколько на самом деле зарабатывают и куда уходят деньги.</p>
+    <p class="lead">Вы отправляете чеки боту в Telegram, ваш финансист ведёт учёт и раз в месяц показывает: сколько заработали, куда ушли деньги и что улучшить. Без таблиц и программ.</p>
+    <div class="hero-btns"><a class="btn btn-gold" href="#" data-cta>Хочу такое же приложение</a>
+    <a class="btn btn-ghost" href="#demo">Посмотреть демо</a></div>
+    <p class="safe">🔒 Ваши данные видите только вы и ваш финансист</p>
+  </div>
+  <div class="hero-pic"><div class="phone"><img src="demo-phone.jpg" alt="Приложение EsepDos: сводка за день"></div></div></section>
+
+  <section>
+    <h2>Что вы получаете</h2>
+    <div class="gets">
+      <div class="get"><div class="ic">📈</div><b>Видите реальную прибыль</b><span>Не «на счёту что-то есть», а сколько бизнес заработал за месяц</span></div>
+      <div class="get"><div class="ic">🔍</div><b>Знаете, куда уходят деньги</b><span>Расходы по статьям, лимиты, что вышло за план</span></div>
+      <div class="get"><div class="ic">🧾</div><b>Ничего не теряется</b><span>Забыли чек? Найдём по выписке банка</span></div>
+      <div class="get"><div class="ic">📱</div><b>Всё в телефоне</b><span>Приложение в Telegram, ничего устанавливать не нужно</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Как это работает</h2>
+    <ol class="steps">
+      <li><b>Подключаем</b><span class="muted">Настраиваем бота и приложение под вас, разбираем выписки за 2 прошлых месяца.</span></li>
+      <li><b>Вы отправляете чеки боту</b><span class="muted">Фото, текстом или голосом, по-русски или по-казахски: 10 секунд.</span></li>
+      <li><b>Каждую неделю сверка</b><span class="muted">Финансист сверяет выписки и задаёт вопросы в приложении.</span></li>
+      <li><b>Раз в месяц итог</b><span class="muted">Сколько пришло, куда ушло, сколько осталось и что улучшить.</span></li>
+    </ol>
+    <h3 class="sub">ИИ только инструмент. Думает финансист</h3>
+    <div class="split">
+      <div class="card role"><div class="ic">🤖</div><div><b>ИИ</b><span class="muted">Собирает и раскладывает данные: читает чеки, накладные и голосовые, разносит расходы по статьям. Быстро и без ручного ввода.</span></div></div>
+      <div class="card role"><div class="ic">👩‍💼</div><div><b>Ваш финансист</b><span class="muted">Проверяет и помогает принять решение: сверяет каждую цифру с выписками, находит пропущенное, задаёт вопросы и говорит, что улучшить: где утекают деньги, что сократить, как копить.</span></div></div>
+    </div>
+  </section>
+
+  <section id="demo">
+    <h2>Посмотрите демо</h2>
+    <p class="muted" style="margin-top:-6px">Так будет выглядеть ваше приложение. Внутри работают все кнопки, цифры и имена вымышленные.</p>
+    <div class="demos"><a class="demo" href="demo.html?m=biz"><div class="ic">💇</div><div><b>Бизнес: услуги</b><span>Салон, студия, клиника: выручка за день, прибыль, сотрудники и их процент</span></div><div class="arr">›</div></a>
+    <a class="demo" href="demo-shop.html?m=shop"><div class="ic">🛍️</div><div><b>Бизнес: торговля</b><span>Магазин, Kaspi Магазин, опт: продажи, остатки и что заказать, наценка</span></div><div class="arr">›</div></a>
+    <a class="demo" href="demo.html?m=self"><div class="ic">👨‍👩‍👧</div><div><b>Для себя</b><span>Личные финансы: куда уходят деньги, лимиты, кредиты, цели</span></div><div class="arr">›</div></a></div>
+  </section>
+
+  <section>
+    <h2>Обо мне</h2>
+    <div class="two"><div class="card">
+      <div class="me"><div class="ava" id="ava">А</div><div><b>Арайлым Ахметова</b><span class="muted">Автор EsepDos, бухгалтер и финансовый аналитик</span></div></div>
+      <ul class="facts">
+        <li><b>12 лет</b> опыта в бухгалтерии и финансах</li>
+        <li>Опыт работы в сферах производства, торговли и логистики</li>
+        <li>Настраиваю бухгалтерский и управленческий учёт с нуля</li>
+        <li>Помогаю предпринимателям понимать доходы, расходы и движение денег</li>
+        <li>Дипломированный финансист</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Почему я это делаю</h3>
+      <p style="margin:0 0 10px">Я люблю, когда в деньгах порядок. Не таблицы ради таблиц, а понятная картина: сколько заработано, куда ушли деньги и что происходит с бизнесом.</p>
+      <p style="margin:0 0 10px">Поэтому я создала EsepDos – приложение, которое помогает собрать финансовую информацию в одном месте и быстро её понять. Для каждого клиента я настраиваю систему с учётом особенностей его бизнеса.</p>
+      <p style="margin:0">Мне важно не просто сдавать отчёты, а помогать предпринимателям понимать свои деньги и принимать решения увереннее.</p>
+    </div></div>
+  </section>
+
+  <section id="review" hidden>
+    <h2>Отзыв</h2>
+    <div class="review"><p id="reviewText"></p><b id="reviewWho"></b></div>
+  </section>
+
+  <section id="price">
+    <h2>Сколько стоит</h2>
+    <div class="prices"><div class="card">
+      <div class="kind">разово</div>
+      <h3>Настройка</h3>
+      <p class="inc"><b>Что входит.</b> Подключаем бота и приложение, настраиваем статьи расходов, разбираем выписки за выбранный период, вносим кредиты и обязательные платежи, учим пользоваться.</p>
+      <p class="res"><b>Результат:</b> приложение с вашими цифрами за прошлые месяцы и понятная картина, куда уходят деньги.</p>
+      <table>
+        <tr><td colspan="2">Личные финансы <span class="sale">скидка до 31 декабря</span></td></tr>
+        <tr><td>за 1 месяц</td><td><span class="old">50&nbsp;000</span><br>25&nbsp;000&nbsp;тг</td></tr>
+        <tr><td>за 2-3 месяца</td><td><span class="old">80&nbsp;000</span><br>40&nbsp;000&nbsp;тг</td></tr>
+        <tr><td>с января 2026 г.</td><td><span class="old">140&nbsp;000</span><br>70&nbsp;000&nbsp;тг</td></tr>
+        <tr><td colspan="2">Бизнес <span class="sale">скидка до 31 декабря</span></td></tr>
+        <tr><td>выписки за 2 месяца</td><td><span class="old">100&nbsp;000</span><br>50&nbsp;000&nbsp;тг</td></tr>
+        <tr><td>выписки с января 2026 г. (11 месяцев)</td><td><span class="old">250&nbsp;000</span><br>120&nbsp;000&nbsp;тг</td></tr>
+        <tr><td colspan="2">Бизнес с готовыми ОПиУ или ДДС</td></tr>
+        <tr><td>переносим ваши отчёты в приложение, без разбора выписок</td><td>от&nbsp;25&nbsp;000&nbsp;тг</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <div class="kind">каждый месяц</div>
+      <h3>Сопровождение</h3>
+      <p class="inc"><b>Что входит.</b> Каждую неделю разбор выписок и чеков, вопросы по непонятным платежам, обновление приложения. Раз в месяц отчёт. Для бизнеса ОПиУ и ДДС в Excel каждый месяц.</p>
+      <p class="res"><b>Результат:</b> учёт не бросается, каждый месяц вы знаете свою прибыль и что улучшить.</p>
+      <table>
+        <tr><td>личные финансы</td><td>20&nbsp;000&nbsp;тг</td></tr>
+        <tr><td>бизнес</td><td>от&nbsp;100&nbsp;000&nbsp;тг</td></tr>
+      </table>
+      <p class="muted" style="margin:10px 0 0;font-size:14px">Цена бизнеса «от»: для одной точки. Если точек или сотрудников больше, точную цену называем до начала работы.</p>
+    </div>
+    <div class="card">
+      <div class="kind">разово, по запросу</div>
+      <h3>Анализ и бухгалтерия</h3>
+      <div class="item"><div class="row"><b>Финансовая модель</b><b>от&nbsp;200&nbsp;000&nbsp;тг</b></div><p>Прибыль, точка безубыточности, план на год. Результат: понимаете, сколько нужно продавать, чтобы зарабатывать нужную сумму, и потянет ли бизнес вторую точку.</p></div>
+      <div class="item"><div class="row"><b>Бухгалтерия</b><b>по&nbsp;договоренности</b></div><p>Налоговая отчётность и её сдача. Результат: управленческий и налоговый учёт в одних руках.</p></div>
+      <div class="item"><div class="row"><b>Доработки приложения</b><b>по&nbsp;договоренности</b></div><p>Свои отчёты, связь с вашей программой учёта.</p></div>
+    </div></div>
+  </section>
+
+  <section id="faq">
+    <h2>Вопросы и ответы</h2>
+    <div class="faq">
+    <details><summary>Нужно что-то устанавливать?</summary><div class="b">Нет. Бот и приложение открываются прямо в Telegram, на телефоне и на компьютере.</div></details>
+    <details><summary>Сколько времени это занимает у меня?</summary><div class="b">Купили, сразу фото чека боту: 10 секунд. Вопросы финансиста по непонятным платежам приходят в приложение раз в неделю: ответить займёт пару минут.</div></details>
+    <details><summary>Я забываю отправлять чеки. Это сработает?</summary><div class="b">Да. Каждую неделю финансист сверяет выписки банков и находит всё, что не попало через бота. Учёт не рассыпается, даже если вы пропустили неделю.</div></details>
+    <details><summary>Кто видит мои данные?</summary><div class="b">Только вы, ваш финансист и те, кого вы сами назовёте. Ваши выписки и цифры мы не показываем и не передаём другим людям. Подробнее в блоке «Конфиденциальность» ниже.</div></details>
+    <details><summary>Можно только бизнес или только личное?</summary><div class="b">Да. Бизнес и личные финансы подключаются отдельно. Если нужно и то и другое, объединяем в одном приложении: видно и прибыль бизнеса, и сколько владелец забирает и тратит на семью.</div></details>
+    <details><summary>Можно дать доступ бухгалтеру или сотрудникам?</summary><div class="b">Да: бухгалтеру, финансисту, управляющему, администратору или продавцу. Каждый видит только своё: продавец свои продажи и задачи, но не прибыль и не ваши личные траты.</div></details>
+    <details><summary>Чем это лучше Excel или обычного приложения учёта?</summary><div class="b">В Excel и приложениях всё вносите вы сами, и через месяц учёт обычно бросают. Здесь вы только отправляете чеки, а сверяет, разносит и объясняет цифры ваш финансист.</div></details>
+    <details><summary>Вы сдаёте налоговую отчётность?</summary><div class="b">EsepDos это управленческий учёт: сколько вы зарабатываете, куда уходят деньги и что улучшить. Бухгалтерия и сдача налоговых отчётов в сопровождение не входят. Если нужно, можем взять и их: стоимость обсуждается отдельно.</div></details>
+    <details><summary>От чего зависит цена?</summary><div class="b">Личные финансы по прайсу. Для бизнеса в прайсе цена «от»: для небольшого бизнеса с одной точкой. Если точек, сотрудников или операций больше, цена выше: точную сумму называем до начала работы, и без вашего согласия она не меняется. Если нужна доработка приложения под ваш бизнес (свои отчёты, связь с вашей программой учёта), она обсуждается и считается отдельно.</div></details>
+    <details><summary>Можно начать прямо с сегодняшнего дня?</summary><div class="b">Учёт можно вести с сегодняшнего дня, но для внедрения нужна история за 2 прошлых месяца. Без неё не видно, какие у вас обычные доходы и расходы, и не из чего поставить план и лимиты. Есть два варианта:<br>1. <b>Выписки.</b> Вы присылаете выписки банков за 2 месяца (или с января), мы их разбираем. Это и есть внедрение по прайсу.<br>2. <b>Готовые отчёты (для бизнеса).</b> Если у бизнеса уже есть ОПиУ или ДДС (в Excel или от бухгалтера), присылаете их, мы переносим в приложение, и начинаем сразу с оплаченного месяца. Так дешевле: оплачиваете только настройку приложения, без разбора выписок, от&nbsp;25&nbsp;000&nbsp;тг.</div></details>
+  </div>
+  </section>
+
+  <section id="privacy">
+    <h2>Конфиденциальность</h2>
+    <details><summary>🔒 Как мы обращаемся с вашими данными</summary><div class="b">
+      <b>Какие данные мы получаем.</b> Выписки банков, фото чеков и накладных, голосовые и сообщения боту, данные о сотрудниках, если подключаете бизнес.<br>
+      <b>Зачем.</b> Только чтобы вести ваш учёт и готовить отчёты. Ни для чего другого ваши данные не используются.<br>
+      <b>Кто видит.</b> Вы, ваш финансист и те, кого вы сами назовёте. Каждый сотрудник видит только своё.<br>
+      <b>Третьим лицам не передаём.</b> Ваши цифры, выписки и имена мы никому не показываем и не пересказываем. Исключение только одно: если этого прямо требует закон.<br>
+      <b>Где хранятся.</b> В закрытом рабочем аккаунте EsepDos и в Telegram. Для распознавания чеков и голосовых используются ИИ-сервисы: им передается только файл, который нужно прочитать.<br>
+      <b>После окончания работы.</b> По вашей просьбе передаём вам все данные и удаляем их у себя.<br>
+      <span class="muted" style="font-size:13px">Это краткая версия. Полная политика конфиденциальности и согласие на обработку данных будут в договоре.</span>
+    </div></details>
+  </section>
+
+  <div class="final">
+    <h2>Хотите так же у себя?</h2>
+    <p>Напишите в Telegram: расскажем, как это будет у вас, и ответим на вопросы. Скидка на внедрение до 31 декабря.</p>
+    <a class="btn btn-gold" href="#" data-cta>Хочу такое же приложение</a>
+  </div>
+</main>
+
+<footer>EsepDos · финансы с Арайлым · 2026</footer>
+
+<script>
+  // Контакт для заявок, фото и отзыв: заполнить здесь
+  const CONTACT = 'https://t.me/arailym_amerzhan';
+  const CTA_TEXT = 'Здравствуйте! Хочу подключить приложение EsepDos.';
+  const PHOTO = 'arailym.jpg?v=3';       // фото рядом с этой страницей
+  const REVIEW = { text: '', who: '' };   // отзыв клиента (только с его согласия)
+
+  document.querySelectorAll('[data-cta]').forEach(a => {
+    a.href = CONTACT + '?text=' + encodeURIComponent(CTA_TEXT);
+    a.target = '_blank'; a.rel = 'noopener';
+  });
+  if (PHOTO) { const img = document.createElement('img'); img.src = PHOTO; img.alt = 'Арайлым'; img.className = 'ava'; document.getElementById('ava').replaceWith(img); }
+  if (REVIEW.text) {
+    document.getElementById('reviewText').textContent = '«' + REVIEW.text + '»';
+    document.getElementById('reviewWho').textContent = REVIEW.who;
+    document.getElementById('review').hidden = false;
+  }
+</script>
+</body>
+</html>
