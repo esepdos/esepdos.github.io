@@ -123,7 +123,7 @@
     { d: D(12, 1), n: 'ТОО «Поставщик-Алматы»', c: 'Поставщики', s: 7200000 },
     { d: D(12, 4), n: 'Зарплата за ноябрь', c: 'ФОТ', s: 9800000 },
     { d: D(12, 8), n: 'Логистика, ТК «Жол»', c: 'Логистика', s: 1300000 },
-    { d: D(12, 12), n: 'Импорт: оплата поставщику (Китай)', c: 'Поставщики', s: 22000000, movable: D(12, 19) },
+    { d: D(12, 11), n: 'Импорт: оплата поставщику (Китай)', c: 'Поставщики', s: 22000000, movable: D(12, 19) },
     { d: D(12, 15), n: 'Кредит Halyk: платёж', c: 'Кредит', s: 2200000 },
     { d: D(12, 22), n: 'ТОО «Поставщик-Алматы»', c: 'Поставщики', s: 6400000 },
     { d: D(12, 25), n: 'Зарплатные налоги за ноябрь', c: 'Налоги', s: 3400000, tax: 1 },
@@ -181,7 +181,7 @@
     if (!bad.length) return `<div class="alert ok"><b>✅ Денег хватает на все платежи до ${ds(days[days.length - 1].d)}</b>Минимальный остаток ${mln(Math.min(...days.map(d => d.bal)))}.</div>`;
     const worst = bad.reduce((a, b) => b.bal < a.bal ? b : a);
     return `<div class="alert"><b>⚠️ ${dn(worst.d)}: ${worst.bal < 0 ? 'не хватит ' + mln(-worst.bal) : 'остаток всего ' + mln(worst.bal)}</b>
-      Причина: оплата импорта 22 млн 12 декабря, а крупные клиенты платят позже. Что можно сделать:
+      Причина: оплата импорта 22 млн 11 декабря, а крупные клиенты платят позже. Что можно сделать:
       ${!moved ? '<button class="btn btn-teal" id="fixMove">Перенести оплату импорта на 19.12</button>' : ''}
       ${!reminded['Мега'] ? '<button class="btn btn-ghost" id="fixAr">Напомнить «Мега Строй» о долге 3,2 млн (просрочка 38 дней)</button>' : ''}</div>`;
   }
@@ -207,7 +207,7 @@
     V.innerHTML = `
       <div class="tiles">
         <div class="tile hl"><div class="l">Деньги на счетах</div><div class="v">${mln(START)}</div><div class="n">3 банка, на 27.11</div></div>
-        <div class="tile"><div class="l">Прибыль за ноябрь</div><div class="v">${mln(6.9e6)}</div><div class="n">октябрь 7,6 млн</div></div>
+        <div class="tile"><div class="l">Прибыль за ноябрь</div><div class="v">${mln(2.56e6)}</div><div class="n">октябрь 2,9 млн</div></div>
         <div class="tile"><div class="l">Выручка за ноябрь</div><div class="v">${mln(68.4e6)}</div><div class="n">план 72 млн · 95%</div></div>
         <div class="tile bad"><div class="l">Клиенты просрочили</div><div class="v">${mln(overdue.reduce((t, a) => t + a.sum, 0))}</div><div class="n">${overdue.length} клиента</div></div>
       </div>
