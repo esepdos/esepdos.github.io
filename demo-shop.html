@@ -1876,12 +1876,13 @@ function wageCard() {
     const cur = names.map(r => Math.round(sumFor(r.name, ymd(cMon), ymd(today)) * r.pct / 100)).reduce((a, x) => a + x, 0);
     const tot = rows.reduce((a, x) => a + x.p, 0);
     const adm = [...new Set(rules.map(r => r.name))].map(n => ruleFor(rules, n, m)).filter(r => r && r.salary > 0 && !/уволен/i.test(r.note || ''));
-    const isToday = +T === +today;
+    const isToday = +T === +today, open = sun >= today;
+    if (!rows.length && !cur) { e.innerHTML = ''; return; }
     e.innerHTML = `<h2>Зарплата ${isToday ? 'сегодня' : 'во ' + WD[WAGE_DAY]}, ${dm(T)}</h2><div class="card">
-      <div class="muted" style="margin-bottom:6px">За прошлую неделю ${dm(mon)}-${dm(sun)}: процент от своих услуг по Altegio.</div>
+      <div class="muted" style="margin-bottom:6px">За неделю ${dm(mon)}-${dm(sun)}${open ? ' (по сегодня, неделя ещё идёт)' : ''}: процент от своих услуг по Altegio.</div>
       ${rows.map(x => `<div class="kv"><span>${esc(x.n)}<span class="muted"> · услуги ${tg0(x.s)} × ${x.pct}%</span></span><b>${tg0(x.p)}</b></div>`).join('') || '<div class="muted">Услуг за эту неделю нет.</div>'}
       ${rows.length ? `<div class="kv" style="border-top:1px solid var(--line);margin-top:4px;padding-top:6px"><span><b>Итого к выплате</b></span><b class="gold">${tg0(tot)}</b></div>` : ''}
-      <div class="kv"><span class="muted">Эта неделя с ${dm(cMon)} (выплата ${dm(nextT)}): накоплено</span><span>${tg0(cur)}</span></div>
+      ${cMon <= today ? `<div class="kv"><span class="muted">Эта неделя с ${dm(cMon)} (выплата ${dm(nextT)}): накоплено</span><span>${tg0(cur)}</span></div>` : ''}
       ${adm.map(r => `<div class="kv"><span class="muted">${esc(r.name)}: оклад ${tg0(r.salary)}${r.target ? ' + таргет ' + tg0(r.target) : ''}${r.centerPct ? ' + ' + r.centerPct + '% от продаж магазина' : ''}</span><span class="muted">раз в месяц</span></div>`).join('')}
       <div class="muted" style="margin-top:6px;font-size:12px">По записям Altegio «клиент пришёл». Процент по договорённости считается от услуг без предоплат, поэтому сумма может немного отличаться.</div>
     </div>`;
