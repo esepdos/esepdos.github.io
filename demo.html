@@ -1884,7 +1884,7 @@ function wageCard() {
       ${rows.length ? `<div class="kv" style="border-top:1px solid var(--line);margin-top:4px;padding-top:6px"><span><b>Итого к выплате</b></span><b class="gold">${tg0(tot)}</b></div>` : ''}
       ${cMon <= today ? `<div class="kv"><span class="muted">Эта неделя с ${dm(cMon)} (выплата ${dm(nextT)}): накоплено</span><span>${tg0(cur)}</span></div>` : ''}
       ${adm.map(r => `<div class="kv"><span class="muted">${esc(r.name)}: оклад ${tg0(r.salary)}${r.target ? ' + таргет ' + tg0(r.target) : ''}${r.centerPct ? ' + ' + r.centerPct + '% от услуг центра' : ''}</span><span class="muted">раз в месяц</span></div>`).join('')}
-      <div class="muted" style="margin-top:6px;font-size:12px">По записям Altegio «клиент пришёл». Процент по договорённости считается от услуг без предоплат, поэтому сумма может немного отличаться.</div>
+      <div class="muted" style="margin-top:6px;font-size:12px">По записям Altegio «клиент пришёл». Процент считается от всех услуг мастера, включая предоплату.</div>
     </div>`;
   };
   put(cget(key));
