@@ -6,7 +6,7 @@
 <title>«Демо-опт» (учёт среднего бизнеса): EsepDos</title>
 <link rel="icon" type="image/svg+xml" href="logo.svg">
 <link rel="icon" type="image/png" href="favicon.png">
-<meta name="description" content="Пример управленческого учёта среднего бизнеса: платёжный календарь, дебиторка, прибыль по направлениям, налоги. Данные из 1С и банков.">
+<meta name="description" content="Пример управленческого учёта среднего бизнеса: платёжный календарь, ДДС, ОПиУ, план-факт, дебиторка и кредиторка, налоги. Данные из 1С и банков.">
 <style>
   :root{--teal:#1f9e90;--tealbg:#e8f6f4;--ink:#12161c;--hint:#5b6470;--line:#e4e7eb;--bg:#f6f7f9;--card:#fff;--red:#d64545;--redbg:#fdecec;--amber:#b7791f;--amberbg:#fdf4e3}
   *{box-sizing:border-box}
@@ -32,7 +32,6 @@
   .line{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid var(--line);font-size:14px}
   .line:first-of-type{border-top:0} .line b{white-space:nowrap}
   .line.tot{font-weight:700;border-top:2px solid var(--ink)}
-  .line.sub{padding-left:12px;color:var(--hint);font-size:13px}
   .neg{color:var(--red)} .pos{color:#11665c} .warn{color:var(--amber)}
   .chip{flex:none;font-size:13px;padding:6px 11px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer;font-family:inherit}
   .chip.on{background:var(--teal);border-color:var(--teal);color:#fff}
@@ -42,16 +41,29 @@
   .day{display:flex;justify-content:space-between;align-items:baseline;margin:12px 0 4px;font-weight:700;font-size:14px}
   .op{display:flex;justify-content:space-between;gap:8px;padding:6px 0 6px 10px;border-left:3px solid var(--line);font-size:14px;margin-left:2px}
   .op.in{border-left-color:var(--teal)} .op.out{border-left-color:#c9ced6} .op.tax{border-left-color:var(--amber)}
-  .op .who{color:var(--ink)} .op .who small{display:block;color:var(--hint);font-size:12px}
+  .op .who small{display:block;color:var(--hint);font-size:12px}
   .alert{background:var(--redbg);border-radius:14px;padding:12px;margin-bottom:12px;color:#7a1d1d;font-size:14px}
+  .alert.mid{background:var(--amberbg);color:#6b4a12}
   .alert.ok{background:var(--tealbg);color:#1d4a45}
   .alert b{display:block;font-size:15px;margin-bottom:4px}
-  .btn{display:block;width:100%;text-align:center;font:inherit;font-weight:700;font-size:15px;padding:12px;border-radius:12px;border:0;cursor:pointer;margin-top:8px;text-decoration:none}
+  .btn{display:block;width:100%;text-align:center;font:inherit;font-weight:700;font-size:14px;padding:11px;border-radius:12px;border:0;cursor:pointer;margin-top:8px;text-decoration:none}
   .btn-teal{background:var(--teal);color:#fff} .btn-ghost{background:#fff;color:var(--teal);border:1.5px solid var(--teal)}
+  .done{display:block;font-size:13px;margin-top:6px}
   .row2{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line);cursor:pointer}
   .row2:first-child{border-top:0}
   .bar{height:8px;background:var(--line);border-radius:99px;overflow:hidden;margin:6px 0 2px}
   .bar i{display:block;height:100%;background:var(--teal)}
+  .tbl{width:100%;border-collapse:collapse;font-size:13px}
+  .tbl th{font-weight:600;color:var(--hint);text-align:right;padding:6px 4px;font-size:12px}
+  .tbl th:first-child,.tbl td:first-child{text-align:left}
+  .tbl td{padding:7px 4px;border-top:1px solid var(--line);text-align:right;white-space:nowrap}
+  .tbl td:first-child{white-space:normal}
+  .tbl tr.b td{font-weight:700}
+  .tbl tr.t td{font-weight:700;border-top:2px solid var(--ink)}
+  .plan{border:1.5px solid var(--line);border-radius:14px;padding:12px;margin-top:10px}
+  .plan.main{border-color:var(--teal);background:var(--tealbg)}
+  .plan b{font-size:15px}
+  .plan ul{margin:6px 0 0;padding-left:18px;font-size:13px;color:#2b323b}
   .nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);padding:6px 0 calc(6px + env(safe-area-inset-bottom))}
   .nav .in{max-width:480px;margin:0 auto;display:flex}
   .nav button{flex:1;border:0;background:none;font-family:inherit;font-size:11px;color:var(--hint);padding:4px 0;cursor:pointer}
@@ -65,7 +77,6 @@
   .note{background:var(--tealbg);color:#1d4a45;border-radius:12px;padding:10px 12px;font-size:13px;margin-bottom:12px}
   .toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:14px;padding:10px 14px;border-radius:12px;opacity:0;transition:.25s;pointer-events:none;z-index:30;max-width:90%}
   .toast.on{opacity:1}
-  svg text{font-family:inherit}
 </style>
 </head>
 <body>
@@ -73,7 +84,7 @@
   <div class="top">
     <div class="row"><a class="back" href="./">‹ О сервисе и цены</a><span class="badge">ДЕМО · данные вымышленные</span></div>
     <div class="ttl">ТОО «Демо-Опт» · оптовая торговля</div>
-    <div class="src">🔄 Данные из 1С и банков · обновлено сегодня в 09:00</div>
+    <div class="src">🔄 Данные берутся из вашей 1С и банков автоматически · обновлено сегодня в 09:00</div>
     <div class="role" id="roles"></div>
   </div>
   <div class="promo">✨ Это пример. Под ваш бизнес сделаем свою версию: ваши статьи, отчёты и нужные именно вам функции.</div>
@@ -82,8 +93,8 @@
 <nav class="nav"><div class="in">
   <button data-t="home" class="on"><span>📊</span>Сводка</button>
   <button data-t="cal"><span>🗓️</span>Календарь</button>
-  <button data-t="ar"><span>📥</span>Дебиторка</button>
-  <button data-t="pl"><span>📈</span>Прибыль</button>
+  <button data-t="debt"><span>⚖️</span>Долги</button>
+  <button data-t="rep"><span>📈</span>Отчёты</button>
   <button data-t="tax"><span>🏛️</span>Налоги</button>
 </div></nav>
 <div class="sheet" id="sheet"><div class="box" id="sheetBox"></div></div>
@@ -94,10 +105,11 @@
 (function () {
   const fmt = n => Math.round(n).toLocaleString('ru-RU').replace(/,/g, ' ');
   const tg = n => fmt(n) + ' ₸';
-  const mln = n => (n / 1e6).toFixed(1).replace('.', ',') + ' млн';
+  const mln = n => (n / 1e6).toFixed(1).replace('.', ',').replace('-', '−') + ' млн';
+  const f1 = n => n.toFixed(1).replace('.', ',').replace('-', '−');
   const MON = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
   const DAYS = ['вс', 'пн', 'вт', 'ср', 'чт', 'пт', 'сб'];
-  const D = (m, d) => new Date(2026, m - 1, d);
+  const D = (m, d) => new Date(m >= 11 ? 2026 : 2027, m - 1, d);
   const TODAY = D(11, 27);
   const dn = d => d.getDate() + ' ' + MON[d.getMonth()] + ', ' + DAYS[d.getDay()];
   const ds = d => String(d.getDate()).padStart(2, '0') + '.' + String(d.getMonth() + 1).padStart(2, '0');
@@ -105,183 +117,224 @@
   const BANKS = [['Halyk Bank', 8800000], ['Kaspi Business', 3100000], ['Freedom Bank', 1200000]];
   const START = BANKS.reduce((t, b) => t + b[1], 0);
   const MINCASH = 5000000;
+  const MGR = 'Ержан';   // в роли «Менеджер по продажам» показываем его
+  const SALES = [['Гульмира', 29.8, 30], ['Ержан', 22.1, 25], ['Айбек', 16.5, 17]];
 
-  // дебиторка: клиенты с отсрочкой
+  // 1210: покупатели с отсрочкой
   const AR = [
     { n: 'ТОО «Север-Маркет»', mgr: 'Ержан', sum: 4100000, due: D(11, 15), plan: D(12, 3) },
     { n: 'ИП Сапарова (сеть «Береке»)', mgr: 'Ержан', sum: 2600000, due: D(11, 25), plan: D(12, 1) },
     { n: 'ТОО «Аптека Плюс»', mgr: 'Гульмира', sum: 6800000, due: D(12, 2), plan: D(12, 2) },
     { n: 'ТОО «Юг-Дистрибуция»', mgr: 'Гульмира', sum: 9400000, due: D(12, 10), plan: D(12, 14) },
-    { n: 'ТОО «Мега Строй»', mgr: 'Ержан', sum: 3200000, due: D(10, 20), plan: D(12, 20) },
+    { n: 'ТОО «Мега Строй»', mgr: 'Ержан', sum: 3200000, due: D(10, 20), plan: null },
     { n: 'ИП Жумабеков', mgr: 'Айбек', sum: 1150000, due: D(12, 5), plan: D(12, 5) },
     { n: 'ТОО «Казахмыс Снаб»', mgr: 'Айбек', sum: 12500000, due: D(12, 18), plan: D(12, 18) },
     { n: 'ТОО «Алатау Фуд»', mgr: 'Гульмира', sum: 5300000, due: D(12, 24), plan: D(12, 24) },
   ];
-  // платежи
-  const OUT = [
-    { d: D(11, 30), n: 'Аренда склада', c: 'Аренда', s: 1500000 },
-    { d: D(12, 1), n: 'ТОО «Поставщик-Алматы»', c: 'Поставщики', s: 7200000 },
-    { d: D(12, 4), n: 'Зарплата за ноябрь', c: 'ФОТ', s: 9800000 },
-    { d: D(12, 8), n: 'Логистика, ТК «Жол»', c: 'Логистика', s: 1300000 },
-    { d: D(12, 11), n: 'Импорт: оплата поставщику (Китай)', c: 'Поставщики', s: 22000000, movable: D(12, 19) },
-    { d: D(12, 15), n: 'Кредит Halyk: платёж', c: 'Кредит', s: 2200000 },
-    { d: D(12, 22), n: 'ТОО «Поставщик-Алматы»', c: 'Поставщики', s: 6400000 },
-    { d: D(12, 25), n: 'Зарплатные налоги за ноябрь', c: 'Налоги', s: 3400000, tax: 1 },
-    { d: D(12, 25), n: 'КПН: авансовый платёж', c: 'Налоги', s: 900000, tax: 1 },
-    { d: D(12, 30), n: 'Аренда склада', c: 'Аренда', s: 1500000 },
+  // мы должны
+  const AP = [
+    { g: '3310 Поставщикам и подрядчикам', items: [['ТОО «Поставщик-Алматы»', 7200000, D(12, 1)], ['ТОО «Поставщик-Алматы»', 6400000, D(12, 22)], ['ТК «Жол», логистика', 1300000, D(12, 8)], ['Аренда склада за декабрь', 1500000, D(11, 30)]] },
+    { g: '3350 Зарплата к выплате', items: [['Зарплата за ноябрь', 9800000, D(12, 4)]] },
+    { g: '3100–3200 Налоги и взносы', items: [['Зарплатные налоги за ноябрь', 3400000, D(12, 25)], ['КПН: аванс за декабрь', 900000, D(12, 25)], ['НДС за 4 квартал (копится)', 5100000, D(2, 25)]] },
+    { g: '3010 Кредит банка', items: [['Halyk: остаток кредита', 18000000, null], ['Halyk: платёж в декабре (из остатка)', 2200000, D(12, 15)]] },
   ];
-  // поступления: по дебиторке + текущие продажи (наличные клиенты, Kaspi)
-  const DAILY = [0, 700000, 750000, 650000, 800000, 700000, 600000]; // по дням недели
-  let moved = false, reminded = {};
+  const IMPORT = { n: 'Импорт: предоплата поставщику (Китай)', s: 22000000, d: D(12, 11) };
+  const DAILY = [0, 700000, 750000, 650000, 800000, 700000, 600000];
+  const FIX = { local: false, mega: false, od: false };
+  const apTotal = () => AP.reduce((t, g) => t + g.items.reduce((s, i) => s + (i[0].includes('из остатка') ? 0 : i[1]), 0), 0);
 
   function flows() {
+    const outs = [];
+    AP.forEach(g => g.items.forEach(([n, s, d]) => {
+      if (!d || d < TODAY || d > D(12, 31)) return;
+      const mv = FIX.local && n.includes('Поставщик-Алматы') && +d === +D(12, 1);
+      outs.push({ n, s, d: mv ? D(12, 16) : d, c: g.g.replace(/^\S+ /, ''), tax: g.g.startsWith('31'), moved: mv });
+    }));
+    outs.push({ n: IMPORT.n, s: IMPORT.s, d: IMPORT.d, c: 'Поставщики, по контракту' });
+    if (FIX.od) outs.push({ n: 'Возврат овердрафта Halyk с процентами', s: 6050000, d: D(12, 21), c: 'Кредит' });
     const days = [];
+    let bal = START;
     for (let k = 0; k <= 34; k++) {
       const d = new Date(TODAY); d.setDate(d.getDate() + k);
-      const ins = AR.filter(a => +a.plan === +d && !(a.mgr === 'Ержан' && a.n.includes('Мега') && !reminded['Мега'])).map(a => ({ n: a.n, s: a.sum, c: 'Оплата клиента' }));
-      if (reminded['Мега'] && +d === +D(12, 11)) ins.push({ n: 'ТОО «Мега Строй» (после напоминания)', s: 3200000, c: 'Оплата клиента' });
+      const ins = AR.filter(a => a.plan && +a.plan === +d).map(a => ({ n: a.n, s: a.sum, c: 'Оплата покупателя (1210)' }));
+      if (FIX.mega && +d === +D(12, 10)) ins.push({ n: 'ТОО «Мега Строй» (после напоминания)', s: 3200000, c: 'Оплата покупателя (1210)' });
+      if (FIX.od && +d === +D(12, 10)) ins.push({ n: 'Овердрафт Halyk на 10 дней', s: 6000000, c: 'Кредит' });
       if (k > 0 && DAILY[d.getDay()]) ins.push({ n: 'Текущие продажи', s: DAILY[d.getDay()], c: 'Продажи без отсрочки' });
-      const outs = OUT.map(o => ({ ...o, d: (moved && o.movable) ? o.movable : o.d })).filter(o => +o.d === +d);
-      days.push({ d, ins, outs });
+      const o = outs.filter(x => +x.d === +d);
+      bal += ins.reduce((t, x) => t + x.s, 0) - o.reduce((t, x) => t + x.s, 0);
+      days.push({ d, ins, outs: o, bal });
     }
-    let bal = START;
-    days.forEach(x => { x.in = x.ins.reduce((t, o) => t + o.s, 0); x.out = x.outs.reduce((t, o) => t + o.s, 0); bal += x.in - x.out; x.bal = bal; });
     return days;
   }
 
-  let ROLE = 'own', tab = 'home';
-  const ROLES = { own: ['Собственник', ['home', 'cal', 'ar', 'pl', 'tax']], com: ['Коммерческий директор', ['home', 'ar', 'pl']], acc: ['Бухгалтер', ['cal', 'ar', 'tax']] };
+  let ROLE = 'own', tab = 'home', rep = 'pl', dside = 'ar';
+  const ROLES = { own: ['Собственник', ['home', 'cal', 'debt', 'rep', 'tax']], com: ['Коммерческий директор', ['home', 'debt', 'rep']], mgr: ['Менеджер по продажам', ['home', 'debt']] };
   const V = document.getElementById('view');
-  const toast = t => { const e = document.getElementById('toast'); e.textContent = t; e.classList.add('on'); setTimeout(() => e.classList.remove('on'), 2500); };
+  const toast = t => { const e = document.getElementById('toast'); e.textContent = t; e.classList.add('on'); setTimeout(() => e.classList.remove('on'), 2600); };
+  const myAR = () => ROLE === 'mgr' ? AR.filter(a => a.mgr === MGR) : AR;
 
   function head() {
     document.getElementById('roles').innerHTML = '<span class="muted" style="flex:none">Смотрю как:</span>' + Object.entries(ROLES).map(([k, [n]]) => `<button class="chip ${ROLE === k ? 'on' : ''}" data-r="${k}">${n}</button>`).join('');
-    document.querySelectorAll('[data-r]').forEach(b => b.onclick = () => { ROLE = b.dataset.r; if (!ROLES[ROLE][1].includes(tab)) tab = ROLES[ROLE][1][0]; render(); toast(ROLE === 'own' ? 'Собственник видит всё' : ROLE === 'com' ? 'Коммерческий директор: продажи, дебиторка, маржа' : 'Бухгалтер: платежи, налоги, дебиторка'); });
+    document.querySelectorAll('[data-r]').forEach(b => b.onclick = () => {
+      ROLE = b.dataset.r; dside = 'ar'; if (ROLE === 'com') rep = 'margin'; if (!ROLES[ROLE][1].includes(tab)) tab = ROLES[ROLE][1][0]; render();
+      toast(ROLE === 'own' ? 'Собственник видит всё' : ROLE === 'com' ? 'Коммерческий директор: продажи, долги покупателей, маржа, план-факт' : 'Менеджер видит свой план и долги своих клиентов');
+    });
     document.querySelectorAll('.nav button').forEach(b => { b.classList.toggle('hide', !ROLES[ROLE][1].includes(b.dataset.t)); b.classList.toggle('on', b.dataset.t === tab); });
   }
 
   function chart(days) {
     const W = 440, H = 150, P = 6, max = Math.max(...days.map(x => x.bal), START), min = Math.min(0, ...days.map(x => x.bal));
     const x = i => P + i * (W - 2 * P) / (days.length - 1), y = v => P + (max - v) * (H - 2 * P - 14) / (max - min || 1);
-    const pts = days.map((d, i) => x(i) + ',' + y(d.bal)).join(' ');
-    const low = days.findIndex(d => d.bal < MINCASH);
     return `<svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block">
-      <line x1="0" x2="${W}" y1="${y(MINCASH)}" y2="${y(MINCASH)}" stroke="#b7791f" stroke-dasharray="4 4" stroke-width="1"/>
+      <line x1="0" x2="${W}" y1="${y(MINCASH)}" y2="${y(MINCASH)}" stroke="#b7791f" stroke-dasharray="4 4"/>
       <text x="${W - 4}" y="${y(MINCASH) - 4}" text-anchor="end" font-size="10" fill="#b7791f">неснижаемый остаток 5 млн</text>
-      ${min < 0 ? `<line x1="0" x2="${W}" y1="${y(0)}" y2="${y(0)}" stroke="#d64545" stroke-width="1"/>` : ''}
-      <polyline points="${pts}" fill="none" stroke="#1f9e90" stroke-width="2.5" stroke-linejoin="round"/>
+      ${min < 0 ? `<line x1="0" x2="${W}" y1="${y(0)}" y2="${y(0)}" stroke="#d64545"/>` : ''}
+      <polyline points="${days.map((d, i) => x(i) + ',' + y(d.bal)).join(' ')}" fill="none" stroke="#1f9e90" stroke-width="2.5" stroke-linejoin="round"/>
       ${days.map((d, i) => d.bal < MINCASH ? `<circle cx="${x(i)}" cy="${y(d.bal)}" r="3.5" fill="#d64545"/>` : '').join('')}
       <text x="${P}" y="${H - 2}" font-size="10" fill="#5b6470">${ds(days[0].d)}</text>
-      <text x="${W - P}" y="${H - 2}" font-size="10" fill="#5b6470" text-anchor="end">${ds(days[days.length - 1].d)}</text>
-    </svg>`;
+      <text x="${W - P}" y="${H - 2}" font-size="10" fill="#5b6470" text-anchor="end">${ds(days[days.length - 1].d)}</text></svg>`;
   }
 
   function gap(days) {
-    const bad = days.filter(d => d.bal < MINCASH);
-    if (!bad.length) return `<div class="alert ok"><b>✅ Денег хватает на все платежи до ${ds(days[days.length - 1].d)}</b>Минимальный остаток ${mln(Math.min(...days.map(d => d.bal)))}.</div>`;
-    const worst = bad.reduce((a, b) => b.bal < a.bal ? b : a);
-    return `<div class="alert"><b>⚠️ ${dn(worst.d)}: ${worst.bal < 0 ? 'не хватит ' + mln(-worst.bal) : 'остаток всего ' + mln(worst.bal)}</b>
-      Причина: оплата импорта 22 млн 11 декабря, а крупные клиенты платят позже. Что можно сделать:
-      ${!moved ? '<button class="btn btn-teal" id="fixMove">Перенести оплату импорта на 19.12</button>' : ''}
-      ${!reminded['Мега'] ? '<button class="btn btn-ghost" id="fixAr">Напомнить «Мега Строй» о долге 3,2 млн (просрочка 38 дней)</button>' : ''}</div>`;
+    const worst = days.reduce((a, b) => b.bal < a.bal ? b : a);
+    const done = [FIX.local && '✓ С «Поставщик-Алматы» договорились оплатить 7,2 млн 16.12', FIX.mega && '✓ «Мега Строй» напомнили, обещают оплатить 10.12', FIX.od && '✓ Овердрафт Halyk 6 млн на 10 дней (проценты около 50 тыс.)'].filter(Boolean);
+    const opts = `${!FIX.local ? '<button class="btn btn-teal" data-fix="local">Договориться с «Поставщик-Алматы»: оплатить 7,2 млн 16.12, а не 01.12</button>' : ''}
+      ${!FIX.mega ? '<button class="btn btn-ghost" data-fix="mega">Взыскать долг «Мега Строй» 3,2 млн (просрочка 38 дней)</button>' : ''}
+      ${!FIX.od ? '<button class="btn btn-ghost" data-fix="od">Открыть овердрафт Halyk 6 млн на 10 дней</button>' : ''}`;
+    const list = done.length ? `<div style="margin-top:8px">${done.map(t => `<span class="done">${t}</span>`).join('')}</div>` : '';
+    if (worst.bal >= MINCASH) return `<div class="alert ok"><b>✅ Денег хватает на все платежи до ${ds(days[days.length - 1].d)}</b>Минимальный остаток ${mln(worst.bal)} (${dn(worst.d)}).${list}</div>`;
+    const neg = worst.bal < 0;
+    return `<div class="alert ${neg ? '' : 'mid'}"><b>⚠️ ${dn(worst.d)}: ${neg ? 'не хватит ' + mln(-worst.bal) : 'остаток всего ' + mln(worst.bal) + ', ниже неснижаемого'}</b>
+      ${neg ? 'В этот день предоплата импорта 22 млн по контракту, её не перенести. А крупные покупатели платят позже. Что можно сделать:' : 'Стало лучше, но запаса мало. Ещё можно:'}${list}${opts}</div>`;
   }
-  function bindGap() {
-    const a = document.getElementById('fixMove'); if (a) a.onclick = () => { moved = true; render(); toast('Платёж перенесён на 19.12, календарь пересчитан'); };
-    const b = document.getElementById('fixAr'); if (b) b.onclick = () => { reminded['Мега'] = true; render(); toast('Напоминание отправлено, ожидаем оплату 11.12'); };
+  function bindGap() { document.querySelectorAll('[data-fix]').forEach(b => b.onclick = () => { FIX[b.dataset.fix] = true; render(); toast('Платёжный календарь пересчитан'); }); }
+
+  function howWeWork() {
+    return `<div class="card"><h3>Как можем работать</h3>
+      <div class="plan main"><b>Ведём за вас</b><ul><li>Финансист EsepDos каждую неделю обновляет календарь и сверяет банки с 1С</li><li>До 10 числа: ОПиУ, ДДС, план-факт и выводы</li><li>Одна встреча в месяц, остальное в приложении</li></ul></div>
+      <div class="plan"><b>Настроим и обучим вашу команду</b><ul><li>Настраиваем отчёты из вашей 1С и платёжный календарь</li><li>Обучаем вашего бухгалтера или финансиста, как их вести</li><li>Дальше сопровождение: ответы на вопросы (до 10 в месяц) и проверка отчётов раз в месяц</li><li>Дешевле, потому что ваша команда работает сама</li></ul></div>
+      <a class="btn btn-teal" href="./" style="margin-top:12px">Обсудить формат</a></div>`;
+  }
+
+  function salesCard(only) {
+    const rows = only ? SALES.filter(s => s[0] === only) : SALES;
+    return `<div class="card"><h3>${only ? 'Мой план продаж, ноябрь' : 'Продажи по менеджерам, ноябрь'}</h3>${rows.map(([n, f, p]) => `<div style="margin:8px 0"><div style="display:flex;justify-content:space-between;font-size:14px"><span>${n}</span><b>${f1(f)} из ${p} млн · ${Math.round(f / p * 100)}%</b></div><div class="bar"><i style="width:${f / p * 100}%"></i></div></div>`).join('')}</div>`;
   }
 
   function home() {
-    const days = flows(), end = days[days.length - 1];
-    const overdue = AR.filter(a => a.due < TODAY);
-    if (ROLE === 'com') {
-      V.innerHTML = `
-        <div class="tiles">
-          <div class="tile hl"><div class="l">Продажи за ноябрь</div><div class="v">${mln(68.4e6)}</div><div class="n">план 72 млн · 95%</div></div>
-          <div class="tile"><div class="l">Валовая маржа</div><div class="v">23,6%</div><div class="n">октябрь 24,1%</div></div>
-          <div class="tile bad"><div class="l">Просрочено клиентами</div><div class="v">${mln(overdue.reduce((t, a) => t + a.sum, 0))}</div><div class="n">${overdue.length} клиента</div></div>
-          <div class="tile"><div class="l">Должны всего</div><div class="v">${mln(AR.reduce((t, a) => t + a.sum, 0))}</div><div class="n">${AR.length} клиентов</div></div>
-        </div>
-        <div class="card"><h3>Продажи по менеджерам, ноябрь</h3>${[['Гульмира', 29.8, 30], ['Ержан', 22.1, 25], ['Айбек', 16.5, 17]].map(([n, f, p]) => `<div style="margin:8px 0"><div style="display:flex;justify-content:space-between;font-size:14px"><span>${n}</span><b>${String(f).replace('.', ',')} из ${p} млн</b></div><div class="bar"><i style="width:${f / p * 100}%"></i></div></div>`).join('')}</div>`;
+    const ar = myAR(), overdue = ar.filter(a => a.due < TODAY), arSum = ar.reduce((t, a) => t + a.sum, 0);
+    if (ROLE !== 'own') {
+      V.innerHTML = `<div class="tiles">
+          <div class="tile hl"><div class="l">${ROLE === 'mgr' ? 'Мои продажи, ноябрь' : 'Продажи за ноябрь'}</div><div class="v">${ROLE === 'mgr' ? '22,1 млн' : '68,4 млн'}</div><div class="n">${ROLE === 'mgr' ? 'план 25 млн · 88%' : 'план 72 млн · 95%'}</div></div>
+          <div class="tile"><div class="l">Валовая маржа</div><div class="v">${ROLE === 'mgr' ? '21,8%' : '23,5%'}</div><div class="n">${ROLE === 'mgr' ? 'по моим клиентам' : 'октябрь 24,0%'}</div></div>
+          <div class="tile bad"><div class="l">${ROLE === 'mgr' ? 'Мои клиенты просрочили' : 'Покупатели просрочили'}</div><div class="v">${mln(overdue.reduce((t, a) => t + a.sum, 0))}</div><div class="n">${overdue.length} клиента</div></div>
+          <div class="tile"><div class="l">${ROLE === 'mgr' ? 'Мои клиенты должны' : 'Покупатели должны (1210)'}</div><div class="v">${mln(arSum)}</div><div class="n">${ar.length} клиентов</div></div></div>
+        ${salesCard(ROLE === 'mgr' ? MGR : null)}
+        ${ROLE === 'mgr' ? `<div class="card"><h3>Что сделать сегодня</h3><div class="line"><span>📞 «Мега Строй»: 38 дней просрочки, 3,2 млн. Новые отгрузки только после оплаты.</span></div><div class="line"><span>📞 «Север-Маркет»: 12 дней просрочки, обещали 3 декабря.</span></div><div class="line"><span>🎯 До плана не хватает 2,9 млн, осталось 3 рабочих дня.</span></div></div>` : ''}`;
       return;
     }
-    V.innerHTML = `
-      <div class="tiles">
+    const days = flows(), end = days[days.length - 1];
+    V.innerHTML = `<div class="tiles">
         <div class="tile hl"><div class="l">Деньги на счетах</div><div class="v">${mln(START)}</div><div class="n">3 банка, на 27.11</div></div>
-        <div class="tile"><div class="l">Прибыль за ноябрь</div><div class="v">${mln(2.56e6)}</div><div class="n">октябрь 2,9 млн</div></div>
-        <div class="tile"><div class="l">Выручка за ноябрь</div><div class="v">${mln(68.4e6)}</div><div class="n">план 72 млн · 95%</div></div>
-        <div class="tile bad"><div class="l">Клиенты просрочили</div><div class="v">${mln(overdue.reduce((t, a) => t + a.sum, 0))}</div><div class="n">${overdue.length} клиента</div></div>
-      </div>
+        <div class="tile"><div class="l">Чистая прибыль, ноябрь</div><div class="v">2,6 млн</div><div class="n">октябрь 2,9 млн</div></div>
+        <div class="tile"><div class="l">Нам должны (1210)</div><div class="v">${mln(arSum)}</div><div class="n">просрочено ${mln(overdue.reduce((t, a) => t + a.sum, 0))}</div></div>
+        <div class="tile"><div class="l">Мы должны</div><div class="v">${mln(apTotal())}</div><div class="n">с кредитом и налогами</div></div></div>
       ${gap(days)}
-      <div class="card"><h3>Остаток денег на 5 недель вперёд</h3>${chart(days)}<div class="muted">На ${ds(end.d)} ожидается ${mln(end.bal)}. Нажмите «Календарь», чтобы увидеть каждый платёж.</div></div>
-      <div class="card"><h3>Счета</h3>${BANKS.map(b => `<div class="line"><span>${b[0]}</span><b>${tg(b[1])}</b></div>`).join('')}</div>
+      <div class="card"><h3>Остаток денег на 5 недель вперёд</h3>${chart(days)}<div class="muted">На ${ds(end.d)} ожидается ${mln(end.bal)}. Каждый платёж во вкладке «Календарь».</div></div>
+      <div class="card"><h3>Отчёты каждый месяц</h3>
+        <div class="line"><span>📈 ОПиУ: прибыли и убытки</span><b>до 10 числа</b></div>
+        <div class="line"><span>💸 ДДС: движение денег</span><b>до 10 числа</b></div>
+        <div class="line"><span>🎯 План-факт по бюджету</span><b>до 10 числа</b></div>
+        <div class="line"><span>🗓️ Платёжный календарь</span><b>каждый день</b></div>
+        <div class="line"><span>⚖️ Нам должны и мы должны</span><b>каждый день</b></div>
+        <button class="btn btn-ghost" id="toRep">Открыть отчёты</button></div>
+      ${salesCard(null)}
       <div class="card"><h3>Что подсказывает финансист</h3>
-        <div class="line"><span>💡 Маржа снизилась с 24,1% до 23,6%: подорожала логистика. Это −340 тыс. прибыли в месяц.</span></div>
+        <div class="line"><span>💡 Маржа снизилась с 24,0% до 23,5%: подорожала логистика. Это −0,3 млн прибыли в месяц.</span></div>
         <div class="line"><span>💡 «Мега Строй» не платит 38 дней. Отгрузки им лучше остановить до оплаты.</span></div>
-        <div class="line"><span>💡 НДС за 4 квартал около ${mln(5.1e6)}: откладывайте по 1,7 млн в месяц, чтобы февраль не стал сюрпризом.</span></div>
-      </div>
-      <a class="btn btn-teal" href="./">Хочу такой учёт</a>`;
+        <div class="line"><span>💡 НДС за 4 квартал около 5,1 млн: откладывайте по 1,7 млн в месяц, чтобы февраль не стал сюрпризом.</span></div></div>
+      ${howWeWork()}`;
     bindGap();
+    document.getElementById('toRep').onclick = () => { tab = 'rep'; render(); window.scrollTo(0, 0); };
   }
 
   function cal() {
-    const days = flows().filter(x => x.ins.length || x.outs.length);
-    V.innerHTML = `${ROLE === 'own' ? gap(flows()) : ''}
-      <div class="note">Платёжный календарь собирается сам: поступления по срокам оплаты клиентов из 1С, платежи поставщикам, зарплата, налоги, кредит. Красным дни, где остаток ниже 5 млн.</div>
+    const all = flows(), days = all.filter(x => x.ins.length || x.outs.length);
+    V.innerHTML = `${gap(all)}
+      <div class="note">Календарь собирается сам: сроки оплат покупателей и поставщикам, договоры и зарплата берутся из 1С, остатки из банков. Ничего вносить вручную не нужно.</div>
       ${days.map(x => `<div class="day"><span>${dn(x.d)}</span><span class="${x.bal < 0 ? 'neg' : x.bal < MINCASH ? 'warn' : 'pos'}">остаток ${mln(x.bal)}</span></div>
         ${x.ins.map(o => `<div class="op in"><span class="who">${o.n}<small>${o.c}</small></span><b class="pos">+${mln(o.s)}</b></div>`).join('')}
-        ${x.outs.map(o => `<div class="op ${o.tax ? 'tax' : 'out'}"><span class="who">${o.n}<small>${o.c}${moved && o.movable ? ' · перенесено' : ''}</small></span><b>−${mln(o.s)}</b></div>`).join('')}`).join('')}`;
+        ${x.outs.map(o => `<div class="op ${o.tax ? 'tax' : 'out'}"><span class="who">${o.n}<small>${o.c}${o.moved ? ' · перенесено по договорённости' : ''}</small></span><b>−${mln(o.s)}</b></div>`).join('')}`).join('')}`;
     bindGap();
   }
 
-  function ar() {
+  function debt() {
     const age = a => Math.round((TODAY - a.due) / 864e5);
-    const groups = [['Срок не наступил', a => age(a) <= 0], ['Просрочка до 30 дней', a => age(a) > 0 && age(a) <= 30], ['Просрочка больше 30 дней', a => age(a) > 30]];
-    const list = ROLE === 'com' ? AR : AR;
-    V.innerHTML = `
-      <div class="tiles">${groups.slice(0, 2).map(([n, f], i) => { const s = list.filter(f).reduce((t, a) => t + a.sum, 0); return `<div class="tile ${i ? 'bad' : ''}"><div class="l">${n}</div><div class="v">${mln(s)}</div></div>`; }).join('')}</div>
-      ${groups.map(([n, f]) => { const g = list.filter(f); return g.length ? `<div class="card"><h3>${n}</h3>${g.map(a => { const d = age(a); return `<div class="row2" data-a="${AR.indexOf(a)}"><div><div style="font-weight:600">${a.n}</div><div class="muted">менеджер ${a.mgr} · срок ${ds(a.due)}</div></div>
-        <div style="text-align:right"><b>${mln(a.sum)}</b><div>${d > 0 ? `<span class="pill ${d > 30 ? 'p-no' : 'p-warn'}">${d} дн. просрочки</span>` : `<span class="pill p-wait">через ${-d} дн.</span>`}</div></div></div>`; }).join('')}</div>` : ''; }).join('')}`;
-    V.querySelectorAll('[data-a]').forEach(e => e.onclick = () => {
-      const a = AR[+e.dataset.a], d = age(a);
-      open(`<button class="close" data-x>×</button><h3>${a.n}</h3><div class="muted">Менеджер ${a.mgr}</div>
-        <div class="card" style="margin-top:12px"><div class="line"><span>Долг</span><b>${tg(a.sum)}</b></div><div class="line"><span>Срок оплаты</span><b>${ds(a.due)}</b></div><div class="line"><span>Статус</span><b class="${d > 0 ? 'neg' : ''}">${d > 0 ? d + ' дней просрочки' : 'срок через ' + (-d) + ' дн.'}</b></div><div class="line"><span>Ожидаем оплату</span><b>${ds(a.plan)}</b></div></div>
-        <button class="btn btn-teal" id="r1">Напомнить клиенту (акт сверки и счёт)</button>
-        <button class="btn btn-ghost" id="r2">Поручить менеджеру ${a.mgr}</button>`);
-      document.getElementById('r1').onclick = () => { if (a.n.includes('Мега')) reminded['Мега'] = true; close(); render(); toast('Клиенту отправлены акт сверки и счёт (в демо не отправляется)'); };
-      document.getElementById('r2').onclick = () => { close(); toast('Задача менеджеру создана (в демо не сохраняется)'); };
-    });
+    const canAP = ROLE === 'own';
+    const chips = `<div class="chips"><button class="chip ${dside === 'ar' ? 'on' : ''}" data-d="ar">${ROLE === 'mgr' ? 'Мои клиенты должны' : 'Нам должны (1210)'}</button>${canAP ? `<button class="chip ${dside === 'ap' ? 'on' : ''}" data-d="ap">Мы должны</button>` : ''}</div>`;
+    if (dside === 'ap' && canAP) {
+      const soon = AP.reduce((t, g) => t + g.items.reduce((s, i) => s + (i[2] && i[2] <= D(12, 31) ? i[1] : 0), 0), 0) + IMPORT.s;
+      V.innerHTML = chips + `<div class="tiles"><div class="tile"><div class="l">Мы должны всего</div><div class="v">${mln(apTotal())}</div><div class="n">из них кредит 18 млн</div></div><div class="tile bad"><div class="l">Платить до 31.12</div><div class="v">${mln(soon)}</div><div class="n">с предоплатой импорта</div></div></div>
+        ${AP.map(g => `<div class="card"><h3>${g.g}</h3>${g.items.map(([n, s, d]) => `<div class="line"><span>${n}${d ? '<br><span class="muted">срок ' + ds(d) + (d.getFullYear() > 2026 ? '.27' : '') + '</span>' : ''}</span><b>${tg(s)}</b></div>`).join('')}</div>`).join('')}
+        <div class="card"><h3>Платежи по контрактам</h3><div class="line"><span>${IMPORT.n}<br><span class="muted">оплата ${ds(IMPORT.d)}, товар придёт в январе</span></span><b>${tg(IMPORT.s)}</b></div></div>`;
+    } else {
+      const ar = myAR();
+      const groups = [['Срок не наступил', a => age(a) <= 0], ['Просрочка до 30 дней', a => age(a) > 0 && age(a) <= 30], ['Просрочка больше 30 дней', a => age(a) > 30]];
+      V.innerHTML = chips + `<div class="tiles">${[['Должны всего', () => true], ['Просрочено', a => age(a) > 0]].map(([n, f], i) => `<div class="tile ${i ? 'bad' : ''}"><div class="l">${n}</div><div class="v">${mln(ar.filter(f).reduce((t, a) => t + a.sum, 0))}</div></div>`).join('')}</div>
+        ${groups.map(([n, f]) => { const g = ar.filter(f); return g.length ? `<div class="card"><h3>${n}</h3>${g.map(a => { const d = age(a); return `<div class="row2" data-a="${AR.indexOf(a)}"><div><div style="font-weight:600">${a.n}</div><div class="muted">менеджер ${a.mgr} · срок ${ds(a.due)}</div></div>
+          <div style="text-align:right"><b>${mln(a.sum)}</b><div>${d > 0 ? `<span class="pill ${d > 30 ? 'p-no' : 'p-warn'}">${d} дн. просрочки</span>` : `<span class="pill p-wait">через ${-d} дн.</span>`}</div></div></div>`; }).join('')}</div>` : ''; }).join('')}`;
+      V.querySelectorAll('[data-a]').forEach(e => e.onclick = () => {
+        const a = AR[+e.dataset.a], d = age(a);
+        open(`<button class="close" data-x>×</button><h3>${a.n}</h3><div class="muted">Менеджер ${a.mgr}</div>
+          <div class="card" style="margin-top:12px"><div class="line"><span>Долг (1210)</span><b>${tg(a.sum)}</b></div><div class="line"><span>Срок оплаты</span><b>${ds(a.due)}</b></div><div class="line"><span>Статус</span><b class="${d > 0 ? 'neg' : ''}">${d > 0 ? d + ' дней просрочки' : 'срок через ' + (-d) + ' дн.'}</b></div></div>
+          <button class="btn btn-teal" id="r1">Отправить клиенту акт сверки и счёт</button>${ROLE !== 'mgr' ? `<button class="btn btn-ghost" id="r2">Поручить менеджеру ${a.mgr}</button>` : ''}`);
+        document.getElementById('r1').onclick = () => { if (a.n.includes('Мега')) FIX.mega = true; close(); render(); toast('Акт сверки и счёт отправлены (в демо не отправляется)'); };
+        const r2 = document.getElementById('r2'); if (r2) r2.onclick = () => { close(); toast('Задача менеджеру создана (в демо не сохраняется)'); };
+      });
+    }
+    V.querySelectorAll('[data-d]').forEach(b => b.onclick = () => { dside = b.dataset.d; debt(); });
   }
 
-  function pl() {
-    const R = [['Выручка (без НДС)', 68.4, 66.2, 72], ['Себестоимость товаров', -52.3, -50.3, -54.7], ['Валовая прибыль', 16.1, 15.9, 17.3, 1],
-      ['ФОТ с налогами: продажи', -3.6, -3.5, -3.6], ['ФОТ с налогами: склад и доставка', -2.4, -2.3, -2.4], ['ФОТ с налогами: офис', -1.9, -1.9, -1.9],
-      ['Аренда склада и офиса', -1.8, -1.8, -1.8], ['Логистика', -1.6, -1.2, -1.3], ['Маркетинг', -0.4, -0.5, -0.5], ['Банк и прочее', -0.5, -0.4, -0.5], ['Проценты по кредиту', -0.7, -0.7, -0.7],
-      ['Прибыль до налога', 3.2, 3.6, 4.6, 1], ['КПН 20% (оценка)', -0.64, -0.72, -0.92], ['Чистая прибыль', 2.56, 2.88, 3.68, 2]];
-    const DIR = [['Продукты питания', 31.2, 19.5], ['Бытовая химия', 18.6, 27.4], ['Медтовары и аптеки', 12.9, 31.8], ['Стройматериалы', 5.7, 14.1]];
-    V.innerHTML = `${ROLE === 'own' ? `<div class="card"><h3>Прибыль и убытки, ноябрь, млн ₸</h3>
-        <div class="line" style="font-size:12px;color:var(--hint)"><span>Статья</span><span style="display:flex;gap:14px"><span>ноябрь</span><span>октябрь</span><span>план</span></span></div>
-        ${R.map(([n, f, o, p, t]) => `<div class="line ${t === 2 ? 'tot' : ''}" style="${t ? 'font-weight:700' : ''}"><span>${n}</span><span style="display:flex;gap:14px;white-space:nowrap"><b class="${f < 0 ? '' : 'pos'}">${f.toFixed(1).replace('.', ',')}</b><span class="muted">${o.toFixed(1).replace('.', ',')}</span><span class="muted">${p.toFixed(1).replace('.', ',')}</span></span></div>`).join('')}
-        <div class="muted" style="margin-top:6px">Логистика выше плана на 0,3 млн, выручка ниже плана на 3,6 млн.</div></div>` : ''}
-      <div class="card"><h3>Маржа по направлениям, ноябрь</h3>${DIR.map(([n, r, m]) => `<div style="margin:9px 0"><div style="display:flex;justify-content:space-between;font-size:14px"><span>${n}</span><b>${String(r).replace('.', ',')} млн · ${String(m).replace('.', ',')}%</b></div><div class="bar"><i style="width:${m / 35 * 100}%;background:${m < 16 ? '#d64545' : '#1f9e90'}"></i></div></div>`).join('')}
-        <div class="muted">Медтовары дают 19% выручки, но 26% валовой прибыли. Стройматериалы с маржой 14% почти не окупают склад.</div></div>`;
+  const PL = [['Выручка (без НДС)', 68.4, 66.2, 72, 'b'], ['Себестоимость товаров', -52.3, -50.3, -54.7], ['Валовая прибыль', 16.1, 15.9, 17.3, 'b'],
+    ['ФОТ с налогами: продажи', -3.6, -3.5, -3.6], ['ФОТ с налогами: склад и доставка', -2.4, -2.3, -2.4], ['ФОТ с налогами: офис', -1.9, -1.9, -1.9],
+    ['Аренда склада и офиса', -1.8, -1.8, -1.8], ['Логистика', -1.6, -1.2, -1.3], ['Маркетинг', -0.4, -0.5, -0.5], ['Банк и прочее', -0.5, -0.4, -0.5], ['Проценты по кредиту', -0.7, -0.7, -0.7],
+    ['Прибыль до налога', 3.2, 3.6, 4.6, 'b'], ['КПН 20% (оценка)', -0.64, -0.72, -0.92], ['Чистая прибыль', 2.56, 2.88, 3.68, 't']];
+  function rpt() {
+    const chips = ROLE === 'com' ? [['margin', 'Маржа'], ['pf', 'План-факт']] : [['pl', 'ОПиУ'], ['cf', 'ДДС'], ['pf', 'План-факт'], ['margin', 'Маржа']];
+    if (!chips.some(c => c[0] === rep)) rep = chips[0][0];
+    let body = '';
+    if (rep === 'pl') body = `<div class="card"><h3>ОПиУ: прибыли и убытки, ноябрь, млн ₸</h3><table class="tbl"><tr><th>Статья</th><th>ноябрь</th><th>октябрь</th></tr>
+        ${PL.map(([n, f, o, p, k]) => `<tr class="${k || ''}"><td>${n}</td><td class="${k && f > 0 ? 'pos' : ''}">${f1(f)}</td><td class="muted">${f1(o)}</td></tr>`).join('')}</table>
+        <div class="muted" style="margin-top:8px">Рентабельность по чистой прибыли 3,7% (октябрь 4,4%).</div></div>`;
+    if (rep === 'cf') {
+      const CF = [['Остаток на 1 ноября', 17.4, 'b'], ['Операционная деятельность', null, 'g'], ['Поступления от покупателей', 71.2], ['Прочие поступления', 0.3], ['Оплата поставщикам', -54.8], ['Зарплата', -9.6], ['Налоги и взносы', -4.9], ['Аренда', -1.8], ['Логистика', -1.6], ['Прочие расходы', -0.9],
+        ['Итого по операционной', -2.1, 'b'], ['Инвестиционная деятельность', null, 'g'], ['Покупка оборудования', 0], ['Финансовая деятельность', null, 'g'], ['Кредит Halyk: тело и проценты', -2.2], ['Итого по финансовой', -2.2, 'b'], ['Остаток на 30 ноября', 13.1, 't']];
+      body = `<div class="card"><h3>ДДС: движение денег, ноябрь, млн ₸</h3><table class="tbl">${CF.map(([n, v, k]) => k === 'g' ? `<tr><td colspan="2" style="font-weight:700;background:#f3f5f7">${n}</td></tr>` : `<tr class="${k || ''}"><td>${n}</td><td class="${v > 0 && !k ? 'pos' : ''}">${v === 0 ? '0' : (v > 0 && !k ? '+' : '') + f1(v)}</td></tr>`).join('')}</table>
+        <div class="muted" style="margin-top:8px">Прибыль в ноябре есть (2,6 млн), а денег стало меньше на 4,3 млн: покупатели должны больше, чем в октябре. Деньги «заморожены» в дебиторке.</div></div>`;
+    }
+    if (rep === 'pf') {
+      const rows = PL.filter(r => r[0] !== 'КПН 20% (оценка)');
+      body = `<div class="card"><h3>План-факт, ноябрь, млн ₸</h3><table class="tbl"><tr><th>Статья</th><th>план</th><th>факт</th><th>откл.</th></tr>
+        ${rows.map(([n, f, o, p, k]) => { const dv = f - p; return `<tr class="${k || ''}"><td>${n}</td><td class="muted">${f1(p)}</td><td>${f1(f)}</td><td class="${Math.abs(dv) < 0.05 ? '' : dv > 0 ? 'pos' : 'neg'}">${Math.abs(dv) < 0.05 ? '0' : (dv > 0 ? '+' : '') + f1(dv)}</td></tr>`; }).join('')}</table>
+        <div class="muted" style="margin-top:8px">Главные отклонения: выручка −3,6 млн (Ержан выполнил план на 88%) и логистика на 0,3 млн выше бюджета.</div></div>`;
+    }
+    if (rep === 'margin') {
+      const DIR = [['Продукты питания', 31.2, 19.5], ['Бытовая химия', 18.6, 27.4], ['Медтовары и аптеки', 12.9, 31.8], ['Стройматериалы', 5.7, 14.1]];
+      body = `<div class="card"><h3>Маржа по направлениям, ноябрь</h3>${DIR.map(([n, r, m]) => `<div style="margin:9px 0"><div style="display:flex;justify-content:space-between;font-size:14px"><span>${n}</span><b>${f1(r)} млн · ${f1(m)}%</b></div><div class="bar"><i style="width:${m / 35 * 100}%;background:${m < 16 ? '#d64545' : '#1f9e90'}"></i></div></div>`).join('')}
+        <div class="muted">Медтовары дают 19% выручки, но 25% валовой прибыли. Стройматериалы с маржой 14% почти не окупают склад.</div></div>`;
+    }
+    V.innerHTML = `<div class="chips">${chips.map(([k, n]) => `<button class="chip ${rep === k ? 'on' : ''}" data-rep="${k}">${n}</button>`).join('')}</div>${body}
+      <div class="muted" style="padding:0 4px">Все отчёты строятся из 1С автоматически, финансист проверяет и пишет выводы.</div>`;
+    V.querySelectorAll('[data-rep]').forEach(b => b.onclick = () => { rep = b.dataset.rep; rpt(); });
   }
 
   function tax() {
-    const T = [
-      [D(12, 25), 'ИПН, ОПВ, ОПВР, СО, ВОСМС, ООСМС, СН за ноябрь', 3400000, 'оплата'],
-      [D(12, 25), 'КПН: авансовый платёж за декабрь', 900000, 'оплата'],
-      [D(1, 25), 'Зарплатные налоги за декабрь', 3500000, 'оплата'],
-      [D(2, 15), 'Декларация по НДС (ф. 300) за 4 квартал', 0, 'сдача'],
-      [D(2, 25), 'НДС за 4 квартал', 5100000, 'оплата'],
-      [D(3, 31), 'Декларация по КПН (ф. 100) за 2026 год', 0, 'сдача'],
-    ];
-    V.innerHTML = `
-      <div class="note">Налоговый календарь: сколько и когда уйдёт, чтобы деньги были заранее. Суммы считаются по данным 1С. Сроки в примере, для вашей компании сверим с НК РК.</div>
+    const T = [[D(12, 25), 'ИПН, ОПВ, ОПВР, СО, ВОСМС, ООСМС, СН за ноябрь', 3400000, 'оплата'], [D(12, 25), 'КПН: авансовый платёж за декабрь', 900000, 'оплата'],
+      [D(1, 25), 'Зарплатные налоги за декабрь', 3500000, 'оплата'], [D(2, 15), 'Декларация по НДС (ф. 300) за 4 квартал', 0, 'сдача'], [D(2, 25), 'НДС за 4 квартал', 5100000, 'оплата'], [D(3, 31), 'Декларация по КПН (ф. 100) за 2026 год', 0, 'сдача']];
+    V.innerHTML = `<div class="note">Налоговый календарь: сколько и когда уйдёт, чтобы деньги были заранее. Суммы считаются по данным 1С. Сроки в примере, для вашей компании сверим с НК РК.</div>
       <div class="card"><h3>НДС за 4 квартал (копится)</h3>
-        <div class="line"><span>Начислено с продаж (окт-ноя)</span><b>${tg(16200000)}</b></div>
-        <div class="line"><span>В зачёт по покупкам и импорту</span><b>−${tg(12800000)}</b></div>
-        <div class="line"><span>Прогноз за декабрь</span><b>+${tg(1700000)}</b></div>
-        <div class="line tot"><span>К оплате 25 февраля (оценка)</span><b class="warn">${tg(5100000)}</b></div>
+        <div class="line"><span>Начислено с продаж (окт-ноя)</span><b>${tg(16200000)}</b></div><div class="line"><span>В зачёт по покупкам и импорту</span><b>−${tg(12800000)}</b></div>
+        <div class="line"><span>Прогноз за декабрь</span><b>+${tg(1700000)}</b></div><div class="line tot"><span>К оплате 25 февраля (оценка)</span><b class="warn">${tg(5100000)}</b></div>
         <div class="muted" style="margin-top:6px">Отложено пока 1,7 млн из 5,1 млн.</div><div class="bar"><i style="width:33%"></i></div></div>
       <div class="card"><h3>Ближайшие налоги</h3>${T.map(([d, n, s, k]) => `<div class="line"><span>${ds(d)}${d.getFullYear() > 2026 ? '.27' : ''} · ${n}</span><b>${s ? tg(s) : '<span class="pill p-wait">' + k + '</span>'}</b></div>`).join('')}</div>`;
   }
@@ -289,7 +342,7 @@
   function open(h) { document.getElementById('sheetBox').innerHTML = h; document.getElementById('sheet').classList.add('open'); document.querySelectorAll('[data-x]').forEach(b => b.onclick = close); }
   function close() { document.getElementById('sheet').classList.remove('open'); }
   document.getElementById('sheet').onclick = e => { if (e.target.id === 'sheet') close(); };
-  const RN = { home, cal, ar, pl, tax };
+  const RN = { home, cal, debt, rep: rpt, tax };
   function render() { head(); RN[tab](); }
   document.querySelectorAll('.nav button').forEach(b => b.onclick = () => { tab = b.dataset.t; render(); window.scrollTo(0, 0); });
   render();
