@@ -346,8 +346,8 @@
   const PHOTO = '';     // файл фото рядом с demo.html, например 'arailym.jpg'
   const CTA_TEXT = 'Здравствуйте! Посмотрел(а) демо EsepDos, хочу подключить такое же приложение.';
   const ctaUrl = () => CONTACT + (CONTACT.includes('?') ? '&' : '?') + 'text=' + encodeURIComponent(CTA_TEXT);
-  const CTA_BTN = !CONTACT ? '' : `<a class="btn demo-cta" href="#" data-cta style="display:block;text-align:center;text-decoration:none;background:#f4c542;color:#1a1a1a;font-weight:700;font-size:17px;padding:15px 12px;border-radius:14px;box-shadow:0 4px 14px rgba(244,197,66,.25)">Хочу такое же приложение</a>`;
-  document.addEventListener('click', e => { const a = e.target.closest('[data-cta]'); if (!a) return; e.preventDefault(); window.open(ctaUrl(), '_blank'); });
+  const CTA_BTN = !CONTACT ? '' : `<a class="btn demo-cta" href="#" data-cta style="display:block;text-align:center;text-decoration:none;background:#f4c542;color:#1a1a1a;font-weight:700;font-size:17px;padding:15px 12px;border-radius:14px;box-shadow:0 4px 14px rgba(244,197,66,.25)">Рассчитать стоимость для моего бизнеса</a>`;
+  document.addEventListener('click', e => { const a = e.target.closest('[data-cta]'); if (!a) return; e.preventDefault(); location.href = './#calc'; });
 
   function showPrice() {
     const ov = document.createElement('div'); ov.className = 'demo-ov'; ov.style.justifyContent = 'flex-start';
@@ -378,6 +378,52 @@
   }
 
   // Карточка «Ваш финансист» на главном экране примера (имя вымышленное)
+  // Подсказки демо: находка месяца, было/стало, «что посмотреть за 1 минуту»
+  const WOW = {
+    biz: 'Прибыль за октябрь 1 066 281 ₸ (30%), а на счёте на конец месяца всего 50 000 ₸: запаса на слабый январь нет. И 40% выручки делает сама собственница.',
+    shop: 'Выручка упала на 16%, а прибыль почти вдвое: 484 817 ₸. Рассрочки забирают 165 000 ₸ в месяц, на счёте 50 000 ₸.',
+    self: 'Импульсивные траты около 180 000 ₸ в месяц при лимите 150 000, больше всего маркетплейсы. А на депозит в этом месяце отложено 0 ₸.',
+  };
+  const TOUR = {
+    biz: [['Откройте «Отчёты»: прибыль и деньги на конец месяца', 'nav [data-tab=reports]'], ['Откройте «Аналитика»: на что обратить внимание', 'nav [data-tab=an]'], ['Переключите роль «Администратор»: что видит сотрудник', '[data-r=admin]']],
+    shop: [['Откройте «Закупка»: что заказать', 'nav [data-tab=buy]'], ['Откройте «Отчёты»: прибыль магазина', 'nav [data-tab=reports]'], ['Переключите роль «Продавец»: что видит сотрудник', '[data-r=admin]']],
+    self: [['Ответьте на вопрос финансиста под «Вопросы и платежи»', '.demo-q, textarea, [data-ans]'], ['Откройте «Кредиты»', '__txt:Кредиты'], ['Откройте «Цели»', '__txt:Цели']],
+  };
+  const TKEY = 'demo_tour_' + MODE;
+  const tdone = () => new Set(JSON.parse(sessionStorage.getItem(TKEY) || '[]'));
+  document.addEventListener('click', e => {
+    const list = TOUR[MODE]; if (!list) return;
+    const s = tdone();
+    list.forEach(([, sel], i) => {
+      if (sel.startsWith('__txt:')) { const b = e.target.closest('button,a,[data-tab],div'); if (b && b.textContent.trim() === sel.slice(6)) s.add(i); }
+      else if (e.target.closest(sel)) s.add(i);
+    });
+    sessionStorage.setItem(TKEY, JSON.stringify([...s]));
+    paintTour();
+  }, true);
+  function paintTour() {
+    const box = document.querySelector('.demo-tour'); if (!box) return;
+    const s = tdone();
+    box.querySelectorAll('li').forEach(li => { const on = s.has(+li.dataset.i); li.style.textDecoration = on ? 'line-through' : ''; li.style.opacity = on ? '.6' : ''; li.querySelector('span').textContent = on ? '✅' : '⬜'; });
+    box.querySelector('.n').textContent = s.size + ' из ' + TOUR[MODE].length;
+  }
+  function introCards() {
+    const app = document.getElementById('app'); if (!app || app.querySelector('.demo-wow') || sessionStorage.getItem('demo_intro_hide')) return;
+    const fin = app.querySelector('.demo-fin'); if (!fin) return;
+    const w = document.createElement('div'); w.className = 'card demo-wow';
+    w.style.cssText = 'margin:0 0 12px;border:2px solid #2bb3a3';
+    w.innerHTML = '<div style="font-size:12px;font-weight:700;color:#2bb3a3;text-transform:uppercase;letter-spacing:.03em;margin-bottom:4px">🔎 Находка этого месяца</div><div style="font-size:15px;line-height:1.4">' + WOW[MODE] + '</div>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;font-size:13px;line-height:1.35"><div style="background:rgba(255,255,255,.06);border-radius:10px;padding:8px"><b style="display:block;font-size:11px;text-transform:uppercase;opacity:.7">Было</b>тетрадь, Excel, выписки в WhatsApp, прибыль «на глаз»</div><div style="background:rgba(43,179,163,.18);border-radius:10px;padding:8px"><b style="display:block;font-size:11px;text-transform:uppercase;opacity:.7">Стало</b>всё в одном приложении, прибыль и прогноз денег, финансист проверяет</div></div>';
+    const tr = document.createElement('div'); tr.className = 'card demo-tour';
+    tr.style.cssText = 'margin:0 0 12px;font-size:14px';
+    tr.innerHTML = '<div style="display:flex;justify-content:space-between;font-weight:700;margin-bottom:6px"><span>Что посмотреть за 1 минуту</span><span class="n" style="font-weight:400;opacity:.7"></span></div>' +
+      TOUR[MODE].map(([txt], i) => '<li data-i="' + i + '" style="list-style:none;padding:4px 0"><span>⬜</span> ' + txt + '</li>').join('') +
+      '<button style="border:0;background:none;color:inherit;opacity:.6;font:inherit;font-size:12px;cursor:pointer;margin-top:4px" id="demoIntroHide">Скрыть подсказки</button>';
+    fin.before(w); w.after(tr);
+    tr.querySelector('#demoIntroHide').onclick = () => { sessionStorage.setItem('demo_intro_hide', '1'); w.remove(); tr.remove(); };
+    paintTour();
+  }
+
   function finCard() {
     const app = document.getElementById('app'); if (!app || app.querySelector('.demo-fin')) return;
     const h = [...app.querySelectorAll('h1')].find(x => /^(Что сегодня|Личное)/.test(x.textContent.trim())); if (!h) return;
@@ -385,7 +431,7 @@
     c.style.cssText = 'display:flex;gap:12px;align-items:center;margin:4px 0 12px';
     c.innerHTML = `<div style="width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#2fd1b2,#0f8a7d);color:#fff;font-weight:700;font-size:20px;display:flex;align-items:center;justify-content:center;flex:none">А</div>
       <div style="flex:1;min-width:0"><div style="font-size:12px;color:var(--hint,#9aa0a6)">Ваш финансист</div><b>Алия</b>
-      <div style="font-size:13px;color:var(--hint,#9aa0a6);line-height:1.35">Каждую неделю сверяет выписки и задаёт вопросы, раз в месяц присылает итог</div></div>
+      <div style="font-size:13px;color:var(--hint,#9aa0a6);line-height:1.35">Каждую неделю сверяет выписки и задаёт вопросы, раз в месяц присылает итог</div><div style="font-size:13px;margin-top:6px;line-height:1.35">❓ ${MODE === 'self' ? 'Подписки в App Store 4 990 каждый месяц: нужны или можно отключить?' : MODE === 'shop' ? 'Перевод 120 000 ₸ от 14.11: это закуп товара или возврат поставщику?' : 'Перевод 45 000 ₸ от 12.11: это материалы или зарплата мастеру?'}</div></div>
       <button class="btn sec" style="width:auto;padding:8px 12px;font-size:13px;flex:none">Написать</button>`;
     c.querySelector('button').onclick = () => toast('Это пример: в вашем приложении здесь связь с вашим финансистом');
     const sub = app.querySelector('.demo-hint') || (h.nextElementSibling && h.nextElementSibling.classList.contains('muted') ? h.nextElementSibling : h);
@@ -421,13 +467,14 @@
   function bar() {
     hint();
     finCard();
+    introCards();
     if (MODE === 'self') document.querySelectorAll('#app .card').forEach(c => { if (/Оплатила за бизнес/.test(c.textContent) && c.style.display !== 'none') c.style.display = 'none'; });
     const app = document.getElementById('app'); if (!app || app.querySelector('.demo-bar')) return;
     const b = document.createElement('div'); b.className = 'demo-bar';
     const roles = MODE !== 'self' ? `<div style="display:flex;gap:4px;flex-wrap:wrap">${[['owner', 'Собственник'], ['admin', SHOP ? 'Продавец' : 'Администратор'], ['fin', 'Финансист']].map(([k, t]) => `<button data-r="${k}" class="${ROLE === k ? 'on' : ''}">${t}</button>`).join('')}</div>` : '<span></span>';
     b.style.flexWrap = 'wrap';
     b.innerHTML = `<div style="width:100%;background:#f4c542;color:#1a1a1a;font-weight:800;font-size:15px;line-height:1.35;padding:10px 12px;border-radius:12px;margin-bottom:8px">✨ Это пример. Под ваш бизнес сделаем свою версию: ваши статьи, отчёты и нужные именно вам функции.</div><span><b>Пример</b></span><span style="display:flex;gap:4px"><button data-m="biz" class="${MODE === 'biz' ? 'on' : ''}">Услуги</button><button data-m="shop" class="${MODE === 'shop' ? 'on' : ''}">Магазин</button><button data-m="self" class="${MODE === 'self' ? 'on' : ''}">Для себя</button><button id="demoP">Цены</button></span>
-      <div style="width:100%;display:flex;gap:6px;align-items:center;justify-content:space-between;margin-top:6px;flex-wrap:wrap">${roles}${CONTACT ? '<button data-cta style="background:#f4c542;color:#1a1a1a;font-weight:700">Хочу так же</button>' : ''}</div>`;
+      <div style="width:100%;display:flex;gap:6px;align-items:center;justify-content:space-between;margin-top:6px;flex-wrap:wrap">${roles}${CONTACT ? '<button data-cta style="background:#f4c542;color:#1a1a1a;font-weight:700">Рассчитать стоимость</button>' : ''}</div>`;
     app.prepend(b);
     b.querySelectorAll('[data-m]').forEach(x => x.onclick = () => { if (x.dataset.m !== MODE) choose(x.dataset.m); });
     b.querySelector('#demoP').onclick = showPrice;

@@ -76,6 +76,28 @@
   .bot.me{background:#e7f6e7;margin-left:40px} .bot.it{margin-right:30px}
   .toast{position:fixed;left:50%;bottom:150px;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:14px;padding:10px 14px;border-radius:12px;opacity:0;transition:.25s;pointer-events:none;z-index:30;max-width:90%}
   .toast.on{opacity:1}
+  .intro{margin:12px 16px 0}
+  .intro .wow{background:#fff;border:2px solid var(--teal);border-radius:16px;padding:12px 14px;font-size:15px;line-height:1.4;margin-bottom:10px}
+  .intro .wow b{display:block;font-size:13px;color:var(--teal);text-transform:uppercase;letter-spacing:.03em;margin-bottom:4px}
+  .intro .ba{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;font-size:13px;line-height:1.35}
+  .intro .ba div{border-radius:12px;padding:9px 10px}
+  .intro .ba div:first-child{background:#f1f3f5;color:#5b6470}
+  .intro .ba div:last-child{background:var(--tealbg);color:#1d4a45}
+  .intro .ba b{display:block;font-size:12px;text-transform:uppercase;letter-spacing:.03em;margin-bottom:2px}
+  .intro .tour{background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-bottom:10px;font-size:14px}
+  .intro .tour .th{display:flex;justify-content:space-between;align-items:center;font-weight:700;margin-bottom:4px}
+  .intro .tour .th button{border:0;background:none;color:var(--hint);font:inherit;font-size:12px;cursor:pointer}
+  .intro .tour li{list-style:none;padding:4px 0 4px 26px;position:relative}
+  .intro .tour li::before{content:'';position:absolute;left:2px;top:6px;width:15px;height:15px;border:2px solid #c9ced6;border-radius:50%}
+  .intro .tour li.done{color:var(--hint);text-decoration:line-through}
+  .intro .tour li.done::before{background:var(--teal);border-color:var(--teal)}
+  .intro .tour ul{margin:0;padding:0}
+  .intro .finq{display:flex;gap:10px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 12px;font-size:14px;line-height:1.35}
+  .intro .finq .av{width:38px;height:38px;border-radius:50%;flex:none;background:linear-gradient(135deg,#2fd1b2,#0f8a7d);color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center}
+  .intro .finq small{display:block;color:var(--hint);font-size:12px}
+  .intro .finq button{flex:none;border:1.5px solid var(--teal);background:#fff;color:var(--teal);font:inherit;font-weight:700;font-size:13px;border-radius:10px;padding:7px 10px;cursor:pointer}
+  .intro .hide{display:block;margin:6px auto 0;border:0;background:none;color:var(--hint);font:inherit;font-size:12px;cursor:pointer}
+
   .promo{margin:12px 16px 0;background:#f4c542;color:#1a1a1a;font-weight:800;font-size:16px;line-height:1.35;padding:12px 14px;border-radius:14px;box-shadow:0 6px 18px rgba(244,197,66,.35)}
 </style>
 </head>
@@ -87,6 +109,13 @@
     <div class="role" id="roles"></div>
   </div>
   <div class="promo">✨ Это пример. Под ваш бизнес сделаем свою версию: ваши статьи, отчёты и нужные именно вам функции.</div>
+  <div class="intro" id="intro">
+    <div class="wow"><b>🔎 Находка этого месяца</b>Не пришли 6 клиенток: −72 000 ₸ за ноябрь. Ещё 4 клиенткам пора на коррекцию: напомните и верните выручку.</div>
+    <div class="ba"><div><b>Было</b>тетрадь, Excel, выписки в WhatsApp, прибыль «на глаз»</div><div><b>Стало</b>всё в одном приложении, прибыль и прогноз денег, финансист проверяет</div></div>
+    <div class="tour"><div class="th"><span>Что посмотреть за 1 минуту</span><span id="tourN">0 из 3</span></div><ul><li data-i="0">Переключите «Мастер Асель»: что видит мастер</li><li data-i="1">Нажмите «+» и запишите клиентку</li><li data-i="2">Откройте «Деньги»: сколько осталось вам</li></ul></div>
+    <div class="finq"><div class="av">А</div><div style="flex:1"><small>Вопрос от вашего финансиста Алии</small>Перевод 15 000 ₸ от 20.11: это материалы или оплата клиентки?</div><button id="finAns">Ответить</button></div>
+    <button class="hide" id="introHide">Скрыть подсказки</button>
+  </div>
   <main id="view"></main>
 </div>
 <button class="fab" id="fab" title="Новая запись">+</button>
@@ -319,7 +348,7 @@
         <div class="line"><span>💡 Не пришли ${noshow.length} клиенток, это ${tg(noshow.reduce((t, a) => t + a.price, 0))} потерянной выручки. Можно брать предоплату 2 000 ₸.</span></div>
         <div class="line"><span>💡 Реклама: ${CL.filter(c => c.src === 'Реклама').length} клиенток пришли по рекламе, остальные по Instagram и рекомендациям.</span></div>
       </div>
-      <a class="btn btn-teal" href="./">Хочу такой учёт</a>`;
+      <a class="btn btn-teal" href="./#calc">Рассчитать стоимость для моего бизнеса</a>`;
   }
 
   function stock() {
@@ -344,6 +373,25 @@
   }
   document.querySelectorAll('.nav button').forEach(b => b.onclick = () => { tab = b.dataset.t; render(); window.scrollTo(0, 0); });
   render();
+})();
+</script>
+
+<script>
+// Подсказки демо: находка, «что посмотреть за 1 минуту», вопрос финансиста
+(function () {
+  const KEY = 'tour_' + location.pathname, TOUR = ["[data-r=asel]", "#fab", "[data-t=money]"];
+  const done = new Set(JSON.parse(sessionStorage.getItem(KEY) || '[]'));
+  const intro = document.getElementById('intro');
+  if (sessionStorage.getItem(KEY + '_hide')) intro.hidden = true;
+  function paint() {
+    intro.querySelectorAll('.tour li').forEach(li => li.classList.toggle('done', done.has(+li.dataset.i)));
+    document.getElementById('tourN').textContent = done.size + ' из ' + TOUR.length;
+  }
+  document.addEventListener('click', e => { TOUR.forEach((s, i) => { if (e.target.closest(s)) done.add(i); }); sessionStorage.setItem(KEY, JSON.stringify([...done])); paint(); }, true);
+  document.addEventListener('focusin', e => { TOUR.forEach((s, i) => { if (e.target.closest(s)) done.add(i); }); sessionStorage.setItem(KEY, JSON.stringify([...done])); paint(); }, true);
+  document.getElementById('finAns').onclick = function () { this.textContent = 'Отправлено ✓'; this.disabled = true; };
+  document.getElementById('introHide').onclick = () => { intro.hidden = true; sessionStorage.setItem(KEY + '_hide', '1'); };
+  paint();
 })();
 </script>
 </body>
