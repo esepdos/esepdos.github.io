@@ -1955,27 +1955,33 @@ function attnHtml(s, t) {
     + (go === 'unc' && UNC_OPEN ? uncHtml(unc) : '')).join('');
 }
 // Задачи и замечания: сотруднику свои открытые с кнопкой «Сделано»; проверяющим все + форма «Новая задача»
+// Выполненные задачи: свёрнуты в «Выполнено (N)», через 7 дней после выполнения не показываются (в таблице остаются)
+let TDOPEN = false;
+function doneDays(s) { const m = String(s || '').match(/(\d{1,2})\.(\d{1,2})\.(\d{4})/); return m ? (Date.now() - new Date(+m[3], +m[2] - 1, +m[1])) / 864e5 : 0; }
 function tasksHtml(t, A) {
   if (!t) return '';
-  const list = (t.tasks || []).slice().sort((a, b) => (!!a.done - !!b.done));
+  const all = (t.tasks || []).filter(x => !x.done || doneDays(x.done) <= 7);
+  const act = all.filter(x => !x.done), dn = all.filter(x => x.done);
   const row = x => `<div style="border-top:1px solid var(--line);padding:8px 0" data-task="${esc(x.id)}">
     <div class="row"><span ${x.done ? 'class="muted" style="text-decoration:line-through"' : ''}>${esc(x.text)}</span>
       ${x.done ? (A ? `<button class="chip" data-tundo>вернуть</button>` : '') : `<button class="chip on" data-tdone>Сделано</button>`}</div>
     <div class="muted">${A ? esc(x.to) + ' · ' : ''}${x.due ? 'срок ' + esc(x.due) + ' · ' : ''}от ${esc(x.by)} ${esc(x.at)}${x.done ? ' · ✓ ' + esc(x.done) + (x.doneBy ? ' (' + esc(x.doneBy) + ')' : '') : ''}</div></div>`;
-  if (!A) return list.length ? `<h2>Задачи и замечания</h2><div class="card">${list.map(row).join('')}</div>` : '';
+  const doneBlock = dn.length ? `<div style="border-top:1px solid var(--line);padding:8px 0;cursor:pointer" data-tdopen class="row"><span class="muted">${TDOPEN ? '▾' : '▸'} Выполнено (${dn.length})</span><span class="muted" style="font-size:12px">${TDOPEN ? 'свернуть' : 'показать'}</span></div>${TDOPEN ? dn.map(row).join('') : ''}` : '';
+  if (!A) return all.length ? `<h2>Задачи и замечания</h2><div class="card">${act.map(row).join('') || '<div class="muted">Активных задач нет 👍</div>'}${doneBlock}</div>` : '';
   const ppl = t.people || [];
   return `<h2>Задачи</h2><div class="card">
     <div class="muted" style="margin-bottom:6px">Задачи ставят финансист и собственник: администратору, друг другу или себе. Получатель видит задачу в «Сводке», бот присылает сообщение. Администратор отметит «Сделано», вам придёт уведомление.</div>
     <select id="tkTo">${ppl.map(n => `<option>${esc(n)}</option>`).join('')}</select>
     <input id="tkText" placeholder="задача или замечание" style="margin-top:6px">
     <div style="display:flex;gap:6px;margin-top:6px"><input id="tkDue" type="date" style="flex:1"><button class="btn" id="tkAdd" style="width:auto;padding:8px 14px">Поставить</button></div>
-    ${list.length ? list.slice(0, 30).map(row).join('') : '<div class="muted" style="margin-top:8px">Задач пока нет</div>'}</div>`;
+    ${act.length ? act.slice(0, 30).map(row).join('') : '<div class="muted" style="margin-top:8px">Активных задач нет</div>'}${doneBlock}</div>`;
 }
 function bindTasks() {
   const rd = () => {
     const el = document.getElementById('tdTasks'); if (el) { el.innerHTML = tasksHtml(TODAY, ME.user.approver); bindTasks(); }
     const at = document.getElementById('tdAttn'); if (at && LASTSUM) { at.innerHTML = attnHtml(LASTSUM, TODAY); bindAttn(); }
   };
+  $app.querySelectorAll('[data-tdopen]').forEach(b => b.onclick = () => { TDOPEN = !TDOPEN; rd(); });
   $app.querySelectorAll('[data-tdone],[data-tundo]').forEach(b => b.onclick = async e => {
     e.stopPropagation();
     const id = b.closest('[data-task]').dataset.task, x = TODAY.tasks.find(q => q.id === id), undo = b.hasAttribute('data-tundo'), old = x.done;
