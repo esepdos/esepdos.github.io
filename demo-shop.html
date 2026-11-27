@@ -1699,6 +1699,32 @@ function mainCardHtml(R) {
     <div class="muted" style="margin-top:6px;font-size:13px">Выручка ${tg0(B.F.rev)} · прибыль ${tg0(B.F.net)} (${B.mg}%)${more > 0 ? ` · ещё ${more} ${plural(more, 'пункт', 'пункта', 'пунктов')} в «Аналитике»` : ''}</div>
   </div>`;
 }
+// «Платежи на месяц вперёд»: обязательные расходы по прошлому месяцу и хватит ли денег
+function payCardHtml(R) {
+  const B = R && bizItems(R); if (!B) return '';
+  const { X, F, i, L } = B;
+  const fx = X.pl.filter(l => l.grp === 'Постоянные').map(l => ({ n: l.name, v: X.val(l, 'f') || 0 })).filter(x => x.v > 0).sort((a, b) => b.v - a.v);
+  if (!fx.length && !L.pay) return '';
+  const top = fx.slice(0, 5), rest = fx.slice(5).reduce((a, x) => a + x.v, 0);
+  const must = fx.reduce((a, x) => a + x.v, 0) + (L.pay || 0);
+  const endL = R.lines.filter(l => l.sec === 'ДДС').find(l => l.grp === 'Остаток на конец');
+  const cash = endL && endL.fact[i] !== null ? (endL.fact[i] || 0) : null;
+  const left = F.rev - F.vr, after = (cash || 0) + left - must;
+  const tight = cash !== null && cash < must * 0.5;
+  const verdict = after < 0 ? `<b style="color:var(--bad)">Может не хватить ${tg0(-after)}</b>: выручки после процентов и материалов меньше, чем обязательных платежей.`
+    : tight ? `<b style="color:var(--warn)">Впритык в начале месяца</b>: на счёте ${tg0(cash)}, а аренда и зарплата обычно раньше, чем придёт выручка. Держите запас.`
+    : `<b style="color:var(--ok)">Хватает</b>: после всех платежей останется около ${tg0(after)}.`;
+  const row = (n, v) => `<div class="row" style="padding:3px 0"><span>${esc(n)}</span><span>${tg0(v)}</span></div>`;
+  return `<h2>Платежи на месяц вперёд</h2><div class="card">
+    <div class="muted" style="margin-bottom:6px">По прошлому месяцу (${mLabel(B.m)}): что придётся заплатить и хватит ли денег.</div>
+    ${top.map(x => row(x.n, x.v)).join('')}${rest ? row('Остальные постоянные', rest) : ''}${L.pay ? row('Рассрочки и кредиты', L.pay) : ''}
+    <div class="row" style="border-top:1px solid var(--line);margin-top:4px;padding-top:6px"><b>Обязательные платежи</b><b>${tg0(must)}</b></div>
+    <div class="row" style="padding:3px 0"><span class="muted">Выручка минус проценты и материалы</span><span>${tg0(left)}</span></div>
+    ${cash !== null ? `<div class="row" style="padding:3px 0"><span class="muted">Денег на конец ${mLabel(B.m)}</span><span>${tg0(cash)}</span></div>` : ''}
+    <div style="margin-top:8px">${verdict}</div>
+    <div class="muted" style="margin-top:6px;font-size:12px">Если указать даты платежей (аренда, зарплата, налоги), покажем, в какой день может не хватить.</div>
+  </div>`;
+}
 function setRep(d) { REP = d; if (REP.months.length && !(REP.months.includes(PFROM) && REP.months.includes(PTO))) PFROM = PTO = REP.factTo || REP.months[REP.months.length - 1]; }
 // ====== Аналитика: что важно и на что обратить внимание, в бизнесе и в личном ======
 let ANV = 'biz';
@@ -1832,7 +1858,7 @@ function renderHome() {
 let TODAY = null, MAINAT = 0;
 // «Главное за месяц» на «Что сегодня»: сначала то, что запомнено, свежие отчёты следом
 function mainCard() {
-  const put = () => { const el = document.getElementById('tdMain'); if (!el || TAB !== 'home') return; try { el.innerHTML = mainCardHtml(REP); } catch (e) { el.innerHTML = ''; } const c = document.getElementById('mainGo'); if (c) c.onclick = () => { ANV = 'biz'; go('an'); }; };
+  const put = () => { const el = document.getElementById('tdMain'); if (!el || TAB !== 'home') return; try { el.innerHTML = mainCardHtml(REP); } catch (e) { el.innerHTML = ''; } const pe = document.getElementById('tdPay'); if (pe) { try { pe.innerHTML = payCardHtml(REP); } catch (e) { pe.innerHTML = ''; } } const c = document.getElementById('mainGo'); if (c) c.onclick = () => { ANV = 'biz'; go('an'); }; };
   if (!REP) { const old = cget(ckey('reports', {})); if (old) setRep(old); }
   put();
   if (Date.now() - MAINAT < 600000) return;   // свежие отчёты не чаще раза в 10 минут
@@ -1877,6 +1903,7 @@ function drawHome(s) {
   if (A) {
     $app.innerHTML = head + `
       <div id="tdMain">${REP ? mainCardHtml(REP) : ''}</div>
+      <div id="tdPay">${REP ? payCardHtml(REP) : ''}</div>
       <div class="card" id="tdAlt"><div class="row"><span class="muted">Сегодня (касса)</span><b>…</b></div></div>
       <h2>Требует внимания</h2>
       <div class="card" id="tdAttn">${attnHtml(s, TODAY)}</div>
