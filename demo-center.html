@@ -77,7 +77,7 @@
   <div class="top">
     <div class="row"><a class="back" href="./">‹ О сервисе и цены</a><span class="badge">ДЕМО · данные вымышленные</span></div>
     <div class="ttl" id="ttl">Учебный центр «Bilim»</div>
-    <div class="seg" id="mode"><button data-mode="teach" class="on">Собственник и учителя</button><button data-mode="part">Трое партнёров</button></div>
+    <div class="seg" id="mode"><button data-mode="teach" class="on">Собственник и учителя</button><button data-mode="part">Двое партнёров</button></div>
     <div class="role" id="roles"></div>
   </div>
   <main id="view"></main>
@@ -100,13 +100,13 @@
   const rnd = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
   const pick = a => a[Math.floor(rnd() * a.length)];
 
-  // люди: в режиме «учителя» это наёмные учителя у собственника, в режиме «партнёры» трое совладельцев
+  // люди: в режиме «учителя» это наёмные учителя у собственника, в режиме «партнёры» двое совладельцев
   const P = [
     { id: 'a', name: 'Айжан', color: '#1f9e90', subj: 'Английский', pay: 'pct', pct: 0.45 },
     { id: 'm', name: 'Марина', color: '#8a5cc4', subj: 'Английский', pay: 'pct', pct: 0.45 },
     { id: 'e', name: 'Ерлан', color: '#c4703b', subj: 'Английский, индивидуально', pay: 'lesson', rate: 4000 },
   ];
-  const PART_SUBJ = { a: 'Английский', m: 'Математика', e: 'Подготовка к школе' };
+  const PART_SUBJ = { a: 'Английский и подготовка к школе', m: 'Математика' };
   const G = [
     { id: 1, n: 'Kids A1', who: 'a', days: [1, 3], t: '16:00', room: 'Кабинет 1', price: 32000, kind: 'group' },
     { id: 2, n: 'Kids A2', who: 'a', days: [2, 4], t: '17:00', room: 'Кабинет 1', price: 32000, kind: 'group' },
@@ -117,7 +117,7 @@
     { id: 7, n: 'Подготовка к школе', who: 'e', days: [2, 4], t: '10:00', room: 'Кабинет 1', price: 30000, kind: 'group' },
   ];
   const PART_G = { 1: 'Английский: малыши', 2: 'Английский: дети', 3: 'Математика 5-6 класс', 4: 'Математика 7-8 класс', 5: 'Математика: ЕНТ', 6: 'Индивидуально', 7: 'Подготовка к школе' };
-  const PART_WHO = { 1: 'a', 2: 'a', 3: 'm', 4: 'm', 5: 'm', 6: 'e', 7: 'e' };
+  const PART_WHO = { 1: 'a', 2: 'a', 3: 'm', 4: 'm', 5: 'm', 6: 'm', 7: 'a' };
   const NAMES = ['Алихан', 'Амина', 'Айсулу', 'Тимур', 'Дильназ', 'Арсен', 'Камила', 'Нурислам', 'Аяла', 'Санжар', 'Медина', 'Ислам', 'Жасмин', 'Ерасыл', 'Томирис', 'Данияр', 'Аружан', 'Алан', 'Сафия', 'Рамазан', 'Айым', 'Ансар', 'Малика', 'Бекжан', 'Зере', 'Адиль', 'Ясмин', 'Нурали', 'Дана', 'Мирас', 'Асель', 'Ильяс', 'Лейла', 'Алдияр', 'Мадина', 'Тамерлан', 'Карина', 'Олжас', 'Самира', 'Эмир', 'Айдана', 'Руслан'];
   const COL = ['#3b82c4', '#c43b6e', '#5a9e3b', '#b7791f', '#8a5cc4', '#1f9e90', '#c4703b'];
 
@@ -141,6 +141,7 @@
   const V = document.getElementById('view');
   const toast = t => { const e = document.getElementById('toast'); e.textContent = t; e.classList.add('on'); setTimeout(() => e.classList.remove('on'), 2300); };
   const PP = id => P.find(p => p.id === id);
+  const PL = () => MODE === 'part' ? P.filter(p => p.id !== 'e') : P;   // партнёров двое
   const who = g => MODE === 'part' ? PART_WHO[g.id] : g.who;
   const gname = g => MODE === 'part' ? PART_G[g.id] : g.n;
   const pname = p => p.name + (MODE === 'part' ? ' (партнёр)' : '');
@@ -152,7 +153,7 @@
   function head() {
     document.querySelectorAll('#mode button').forEach(b => b.classList.toggle('on', b.dataset.mode === MODE));
     document.getElementById('peopleTab').textContent = MODE === 'part' ? 'Партнёры' : 'Учителя';
-    const r = [['owner', MODE === 'part' ? 'Общий вид' : 'Собственник'], ...P.map(p => [p.id, (MODE === 'part' ? 'Партнёр ' : 'Учитель ') + p.name])];
+    const r = [['owner', MODE === 'part' ? 'Общий вид' : 'Собственник'], ...PL().map(p => [p.id, (MODE === 'part' ? 'Партнёр ' : 'Учитель ') + p.name])];
     document.getElementById('roles').innerHTML = '<span class="muted" style="flex:none">Смотрю как:</span>' + r.map(([k, n]) => `<button class="chip ${ROLE === k ? 'on' : ''}" data-r="${k}">${n}</button>`).join('');
     document.querySelectorAll('[data-r]').forEach(b => b.onclick = () => {
       ROLE = b.dataset.r; gf = 'all'; if (ROLE !== 'owner' && tab === 'money') tab = 'today'; render();
@@ -167,7 +168,7 @@
     const ending = S.filter(s => s.paid && s.left <= 1 && mineG(G.find(g => g.id === s.g)));
     const unpaid = S.filter(s => !s.paid && mineG(G.find(g => g.id === s.g)));
     V.innerHTML = `
-      ${ROLE === 'owner' && dayOff === 0 ? `<div class="note">Так выглядит учёт учебного центра в EsepDos. Вверху переключите «${MODE === 'part' ? 'Трое партнёров' : 'Собственник и учителя'}» и «Смотрю как». Нажмите на занятие, чтобы отметить, кто пришёл.</div>` : ''}
+      ${ROLE === 'owner' && dayOff === 0 ? `<div class="note">Так выглядит учёт учебного центра в EsepDos. Вверху переключите «${MODE === 'part' ? 'Двое партнёров' : 'Собственник и учителя'}» и «Смотрю как». Нажмите на занятие, чтобы отметить, кто пришёл.</div>` : ''}
       <div class="chips"><button class="chip" id="prev">‹</button><button class="chip on" style="min-width:170px">${dayOff === 0 ? 'Сегодня, ' : ''}${d.getDate()} ${MON[d.getMonth()]}, ${DAYS[d.getDay()]}</button><button class="chip" id="next">›</button></div>
       <div class="tiles">
         <div class="tile ${unpaid.length ? '' : 'hl'}"><div class="l">Не оплатили</div><div class="v ${unpaid.length ? 'neg' : ''}">${unpaid.length}</div><div class="n">${tg(unpaid.reduce((t, s) => t + s.sum, 0))}</div></div>
@@ -260,7 +261,7 @@
   // деньги за ноябрь: по каждому человеку
   function calc() {
     const rent = 280000, ads = 70000, other = 35000;
-    const rows = P.map(p => {
+    const rows = PL().map(p => {
       const gs = G.filter(g => who(g) === p.id);
       const st = S.filter(s => gs.some(g => g.id === s.g));
       const rev = st.filter(s => s.paid).reduce((t, s) => t + s.sum, 0); // ноябрь: оплаченные абонементы
@@ -278,16 +279,16 @@
     if (MODE === 'part') {
       const show = c.rows.filter(r => ROLE === 'owner' || r.p.id === ROLE);
       V.innerHTML = `
-        <div class="note">Оплата приходит на одно ИП, а каждый партнёр видит, сколько заработал сам. Общие расходы (аренда, реклама, налог) делятся на троих поровну, долю можно настроить.</div>
-        ${show.map(r => { const share = c.common / 3, net = r.rev - share; return `<div class="card"><h3><span class="dot" style="background:${r.p.color}"></span>${r.p.name} · ${PART_SUBJ[r.p.id]}</h3>
+        <div class="note">Оплата приходит на одно ИП, а каждый партнёр видит, сколько заработал сам. Общие расходы (аренда, реклама, налог) делятся пополам, долю можно настроить.</div>
+        ${show.map(r => { const share = c.common / 2, net = r.rev - share; return `<div class="card"><h3><span class="dot" style="background:${r.p.color}"></span>${r.p.name} · ${PART_SUBJ[r.p.id]}</h3>
           <div class="line"><span>Оплаты его учеников (${r.st.length})</span><b>${tg(r.rev)}</b></div>
-          <div class="line"><span>Его доля общих расходов, 1/3</span><b class="neg">−${tg(share)}</b></div>
+          <div class="line"><span>Его доля общих расходов, 1/2</span><b class="neg">−${tg(share)}</b></div>
           <div class="line tot"><span>Перевести ${r.p.name} за ноябрь</span><b class="pos">${tg(net)}</b></div>
           <div class="muted" style="margin-top:6px">Группы: ${r.gs.map(gname).join(', ')}</div></div>`; }).join('')}
         ${ROLE === 'owner' ? `<div class="card"><h3>Общие расходы ноября</h3>
           <div class="line"><span>Аренда</span><b>${tg(c.rent)}</b></div><div class="line"><span>Реклама</span><b>${tg(c.ads)}</b></div>
           <div class="line"><span>Связь, Kaspi, хозтовары</span><b>${tg(c.other)}</b></div><div class="line"><span>Налог ИП (пример 3%)</span><b>${tg(c.tax)}</b></div>
-          <div class="line tot"><span>Итого, на каждого по ${tg(c.common / 3)}</span><b>${tg(c.common)}</b></div></div>` : ''}`;
+          <div class="line tot"><span>Итого, на каждого по ${tg(c.common / 2)}</span><b>${tg(c.common)}</b></div></div>` : ''}`;
       return;
     }
     const show = c.rows.filter(r => ROLE === 'owner' || r.p.id === ROLE);
@@ -317,7 +318,7 @@
         <div class="line"><span>Реклама</span><b class="neg">−${tg(c.ads)}</b></div>
         <div class="line"><span>Связь, Kaspi, хозтовары</span><b class="neg">−${tg(c.other)}</b></div>
         <div class="line"><span>Налог ИП (пример 3%)</span><b class="neg">−${tg(c.tax)}</b></div>
-        <div class="line tot"><span>${MODE === 'part' ? 'Прибыль центра (делится на троих)' : 'Прибыль центра'}</span><b class="pos">${tg(profit)}</b></div>
+        <div class="line tot"><span>${MODE === 'part' ? 'Прибыль центра (делится на двоих)' : 'Прибыль центра'}</span><b class="pos">${tg(profit)}</b></div>
       </div>
       <div class="card"><h3>По группам</h3>${G.map(g => { const st = S.filter(s => s.g === g.id), r = st.reduce((t, s) => t + s.sum, 0); return `<div class="line"><span>${gname(g)} · ${st.length} уч.</span><b>${tg(r)}</b></div>`; }).join('')}</div>
       <div class="card"><h3>Что подсказывает финансист</h3>
@@ -331,7 +332,7 @@
   function open(h) { document.getElementById('sheetBox').innerHTML = h; document.getElementById('sheet').classList.add('open'); document.querySelectorAll('[data-x]').forEach(b => b.onclick = close); }
   function close() { document.getElementById('sheet').classList.remove('open'); }
   document.getElementById('sheet').onclick = e => { if (e.target.id === 'sheet') close(); };
-  document.querySelectorAll('#mode button').forEach(b => b.onclick = () => { MODE = b.dataset.mode; ROLE = 'owner'; gf = 'all'; render(); toast(MODE === 'part' ? 'Трое партнёров, оплата на одно ИП: у каждого свои группы и своя доля' : 'Собственник нанимает учителей на процент или за урок'); });
+  document.querySelectorAll('#mode button').forEach(b => b.onclick = () => { MODE = b.dataset.mode; ROLE = 'owner'; gf = 'all'; render(); toast(MODE === 'part' ? 'Двое партнёров, оплата на одно ИП: у каждого свои группы и своя доля' : 'Собственник нанимает учителей на процент или за урок'); });
   const R = { today, students, people, money };
   function render() {
     head();
