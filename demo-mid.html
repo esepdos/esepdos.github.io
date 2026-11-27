@@ -408,7 +408,7 @@
 <script>
 // Подсказки демо: находка, «что посмотреть за 1 минуту», вопрос финансиста
 (function () {
-  const KEY = 'tour_' + location.pathname, TOUR = ["[data-fix]", "[data-d=ap]", "[data-rep=cf]"];
+  const KEY = 'tour_' + location.pathname, TOUR = ["#planOk, [data-opt]", "[data-d=ap]", "[data-rep=cf]"];
   const done = new Set(JSON.parse(sessionStorage.getItem(KEY) || '[]'));
   const intro = document.getElementById('intro');
   if (sessionStorage.getItem(KEY + '_hide')) intro.hidden = true;
