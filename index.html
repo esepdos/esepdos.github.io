@@ -235,7 +235,7 @@
       <h3>Внедрение</h3>
       <p class="inc"><b>Что входит.</b> Подключаем бота и приложение, настраиваем статьи расходов под ваш бизнес, разбираем выписки или берём данные из вашей 1С, вносим кредиты и обязательные платежи, учим пользоваться.</p>
       <p class="res"><b>Результат:</b> приложение с вашими цифрами за прошлые месяцы и понятная картина, куда уходят деньги.</p>
-      <div style="background:#fff6d6;border:1.5px solid #f4c542;border-radius:12px;padding:10px 12px;font-weight:700;font-size:15px;margin:10px 0">🎁 До 31 декабря: первый месяц сопровождения в подарок<br><span style="font-weight:400;font-size:13px">для личных финансов и малого бизнеса</span></div>
+      <div style="background:#fff6d6;border:1.5px solid #f4c542;border-radius:12px;padding:10px 12px;font-weight:700;font-size:15px;margin:10px 0">🎁 До 31 декабря: первый месяц сопровождения в подарок</div>
       <table>
         <tr><td>Личные финансы</td><td>от&nbsp;40&nbsp;000&nbsp;тг</td></tr>
         <tr><td>Малый бизнес<br><span class="muted" style="font-size:13px">салон, студия, магазин, учебный центр</span></td><td>от&nbsp;100&nbsp;000&nbsp;тг</td></tr>
@@ -342,7 +342,7 @@
       let lvl = Math.max(+A.turn, +A.points);
       if (A.sphere === 'opt' || A.soft === '1c') lvl = Math.max(lvl, 2);
       if (A.sphere === 'opt' && +A.turn === 3) lvl = 3;
-      const T = { 1: ['Малый бизнес', [100000, 150000], [100000, 150000], true], 2: ['Бизнес с несколькими точками', [150000, 250000], [150000, 250000], true], 3: ['Средний бизнес', [300000, 500000], [300000, 400000], false] }[lvl];
+      const T = { 1: ['Малый бизнес', [100000, 150000], [100000, 150000], true], 2: ['Бизнес с несколькими точками', [150000, 250000], [150000, 250000], true], 3: ['Средний бизнес', [300000, 500000], [300000, 400000], true] }[lvl];
       return { tier: T[0], setup: T[1], month: T[2], gift: T[3], diag: true,
         text: 'Бизнес: ' + L.sphere[A.sphere] + ', оборот ' + L.turn[A.turn] + ', точек ' + L.points[A.points] + ', учёт: ' + L.soft[A.soft] };
     }
