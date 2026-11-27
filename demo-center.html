@@ -158,7 +158,7 @@
       s.hist.push({ d, st: r < 0.8 ? 'y' : r < 0.9 ? 'n' : 'w' });
     }
     const charged = s.hist.filter(h => h.st !== 'w').length;
-    s.lessons = Math.max(s.lessons, Math.min(charged + 2, 10));
+    if (g.kind === 'ind') { s.lessons = Math.max(s.lessons, Math.min(charged + 2, 10)); s.sum = g.price * s.lessons; }
     if (s.paid) s.left = Math.max(0, s.lessons - charged);
   });
   let MODE = 'teach', ROLE = 'owner', tab = 'today', dayOff = 0, gf = 'all', q = '';
