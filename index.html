@@ -7,9 +7,9 @@
 <link rel="icon" type="image/svg+xml" href="logo.svg">
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<meta name="description" content="Финансовый директор на аутсорсе для малого и среднего бизнеса. Прибыль каждой точки и деньги на месяц вперёд у вас в телефоне. Ваш финансист сверяет банки, 1С и Altegio и раз в месяц показывает, сколько вы заработали.">
+<meta name="description" content="Финансовый директор на аутсорсе для малого и среднего бизнеса. Прибыль каждой точки и прогноз денег на месяц вперёд у вас в телефоне. Ваш финансист сверяет банки, 1С и Altegio и раз в месяц показывает, сколько вы заработали.">
 <meta property="og:title" content="EsepDos · финансы с Арайлым">
-<meta property="og:description" content="Финансовый директор на аутсорсе. Прибыль каждой точки и деньги на месяц вперёд у вас в телефоне.">
+<meta property="og:description" content="Финансовый директор на аутсорсе. Прибыль каждой точки и прогноз денег на месяц вперёд у вас в телефоне.">
 <style>
   :root{--teal:#1f9e90;--teal2:#2bb3a3;--tealbg:#e8f6f4;--gold:#f4c542;--ink:#12161c;--hint:#5b6470;--line:#e4e7eb;--bg:#f6f7f9;--card:#fff}
   *{box-sizing:border-box}
@@ -40,6 +40,17 @@
   .res{background:var(--tealbg);border-radius:10px;padding:8px 10px;color:#1d4a45}
   .btn{display:block;text-align:center;text-decoration:none;font-weight:700;font-size:17px;padding:16px 14px;border-radius:14px;border:0;cursor:pointer;font-family:inherit;width:100%}
   .btn-gold{background:var(--gold);color:#1a1a1a;box-shadow:0 6px 18px rgba(244,197,66,.35)}
+  .calc .q{margin-bottom:14px}
+  .calc .q b{display:block;margin-bottom:8px;font-size:16px}
+  .calc .opts{display:flex;flex-wrap:wrap;gap:8px}
+  .calc .opts button{font:inherit;font-size:14px;padding:9px 13px;border-radius:12px;border:1.5px solid var(--line);background:#fff;cursor:pointer;color:var(--ink)}
+  .calc .opts button.on{background:var(--teal);border-color:var(--teal);color:#fff}
+  .calc .res{background:var(--tealbg);border-radius:14px;padding:14px;margin-top:6px}
+  .calc .res .big{font-size:20px;font-weight:800;margin:2px 0 8px}
+  .calc .res .row{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-top:1px solid rgba(0,0,0,.06);font-size:15px}
+  .calc .res .row:first-of-type{border-top:0}
+  .final .btn-ghost{margin-top:10px}
+
   .btn-teal{background:var(--teal);color:#fff;margin-top:10px}
   .btn-ghost{background:var(--card);color:var(--teal);border:1.5px solid var(--teal);margin-top:10px}
   .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:12px}
@@ -126,10 +137,10 @@
 <main class="wrap">
   <section class="hero"><div class="hero-txt">
     <div style="color:var(--teal);font-weight:700;font-size:15px;margin-bottom:8px">EsepDos · финансовый директор на аутсорсе</div>
-    <h1>Прибыль каждой точки и деньги на месяц вперёд у вас в телефоне</h1>
+    <h1>Прибыль каждой точки и прогноз денег на месяц вперёд у вас в телефоне</h1>
     <p class="who">Для владельцев бизнеса с одной или несколькими точками: салоны, студии, учебные центры, магазины, опт. И для семей, которые хотят понимать свои деньги.</p>
     <p class="lead">Ваш финансист каждую неделю сверяет цифры из банков и ваших программ учёта, а раз в месяц показывает: сколько заработала каждая точка, куда ушли деньги и хватит ли их на следующий месяц. В 3-4 раза дешевле финансового директора в штате.</p>
-    <div class="hero-btns"><a class="btn btn-gold" href="#" data-cta>Хочу такое же приложение</a>
+    <div class="hero-btns"><a class="btn btn-gold" href="#calc">Рассчитать стоимость</a>
     <a class="btn btn-ghost" href="#demo">Посмотреть демо</a></div>
     <p class="safe">🔒 Ваши данные видите только вы и ваш финансист</p>
   </div>
@@ -196,6 +207,20 @@
     <div class="review"><p id="reviewText"></p><b id="reviewWho"></b></div>
   </section>
 
+  <section id="calc">
+    <h2>Рассчитать стоимость</h2>
+    <p class="muted" style="margin-top:-6px">5 коротких вопросов, и вы сразу увидите примерную цену. Точную назовём после разговора.</p>
+    <div class="card calc" id="calcBox">
+      <div class="q" data-q="who"><b>1. Для кого учёт?</b><div class="opts"><button data-v="biz">Бизнес</button><button data-v="self">Личные финансы</button></div></div>
+      <div class="q biz" data-q="sphere"><b>2. Чем занимаетесь?</b><div class="opts"><button data-v="services">Услуги: салон, студия, клиника</button><button data-v="edu">Обучение: центр, курсы</button><button data-v="trade">Торговля: магазин, Kaspi</button><button data-v="opt">Опт, дистрибуция, производство</button></div></div>
+      <div class="q biz" data-q="turn"><b>3. Оборот в месяц?</b><div class="opts"><button data-v="1">до 5 млн</button><button data-v="2">5-20 млн</button><button data-v="3">больше 20 млн</button></div></div>
+      <div class="q biz" data-q="points"><b>4. Сколько точек или направлений?</b><div class="opts"><button data-v="1">1</button><button data-v="2">2-3</button><button data-v="3">4 и больше</button></div></div>
+      <div class="q biz" data-q="soft"><b>5. Где сейчас ведёте учёт?</b><div class="opts"><button data-v="none">Нигде или в тетради</button><button data-v="excel">Excel</button><button data-v="altegio">Altegio, YCLIENTS и т.п.</button><button data-v="1c">1С</button></div></div>
+      <div class="q self" data-q="selfkind" hidden><b>2. Что важнее всего?</b><div class="opts"><button data-v="where">Понять, куда уходят деньги</button><button data-v="debt">Кредиты и долги</button><button data-v="save">Начать копить</button></div></div>
+      <div id="calcRes" hidden></div>
+    </div>
+  </section>
+
   <section id="price">
     <h2>Сколько стоит</h2>
     <div class="prices"><div class="card" style="border:2px solid var(--teal)">
@@ -245,7 +270,7 @@
     <details><summary>Нужно что-то устанавливать?</summary><div class="b">Нет. Бот и приложение открываются прямо в Telegram, на телефоне и на компьютере.</div></details>
     <details><summary>Сколько времени это занимает у меня?</summary><div class="b">Купили, сразу фото чека боту: 10 секунд. Вопросы финансиста по непонятным платежам приходят в приложение раз в неделю: ответить займёт пару минут.</div></details>
     <details><summary>Я забываю отправлять чеки. Это сработает?</summary><div class="b">Да. Каждую неделю финансист сверяет выписки банков и находит всё, что не попало через бота. Учёт не рассыпается, даже если вы пропустили неделю.</div></details>
-    <details><summary>С какими программами вы работаете?</summary><div class="b">С любыми: 1С, Altegio, YCLIENTS, МойСклад, Poster, iiko, Kaspi и выписками любых банков. Данные финансист берёт сам из вашей программы или вы присылаете выгрузку. С Altegio уже есть готовая связка: приходы и выручка попадают туда и обратно сами. С другими программами связь настраиваем как доработку, если она нужна.</div></details>
+    <details><summary>С какими программами вы работаете?</summary><div class="b">С любыми: 1С, Altegio, YCLIENTS, МойСклад, Poster, iiko, Kaspi и выписками любых банков. Данные финансист берёт сам из вашей программы или вы присылаете выгрузку. С Altegio уже есть готовая связка: приходы и выручка попадают туда и обратно сами. С другими программами связь настраиваем, если она нужна: часто это входит во внедрение, а если работа большая, скажем стоимость заранее.</div></details>
     <details><summary>Кто видит мои данные?</summary><div class="b">Только вы, ваш финансист и те, кого вы сами назовёте. Ваши выписки и цифры мы не показываем и не передаём другим людям. Подробнее в блоке «Конфиденциальность» ниже.</div></details>
     <details><summary>Можно только бизнес или только личное?</summary><div class="b">Да. Бизнес и личные финансы подключаются отдельно. Если нужно и то и другое, объединяем в одном приложении: видно и прибыль бизнеса, и сколько владелец забирает и тратит на семью.</div></details>
     <details><summary>Можно дать доступ бухгалтеру или сотрудникам?</summary><div class="b">Да: бухгалтеру, финансисту, управляющему, администратору или продавцу. Каждый видит только своё: продавец свои продажи и задачи, но не прибыль и не ваши личные траты.</div></details>
@@ -271,8 +296,9 @@
 
   <div class="final">
     <h2>Хотите так же у себя?</h2>
-    <p>Напишите в Telegram: расскажем, как это будет у вас, и ответим на вопросы. До 31 декабря первый месяц сопровождения в подарок.</p>
-    <a class="btn btn-gold" href="#" data-cta>Хочу такое же приложение</a>
+    <p>Ответьте на 5 вопросов и сразу увидите примерную стоимость. До 31 декабря первый месяц сопровождения в подарок.</p>
+    <a class="btn btn-gold" href="#calc">Рассчитать стоимость</a>
+    <a class="btn btn-ghost" href="#" data-cta>Написать в Telegram</a>
   </div>
 </main>
 
@@ -281,7 +307,7 @@
 <script>
   // Контакт для заявок, фото и отзыв: заполнить здесь
   const CONTACT = 'https://t.me/arailym_amerzhan';
-  const CTA_TEXT = 'Здравствуйте! Хочу подключить приложение EsepDos.';
+  const CTA_TEXT = 'Здравствуйте! Хочу обсудить учёт для моего бизнеса.';
   const PHOTO = 'arailym.jpg?v=3';       // фото рядом с этой страницей
   const REVIEW = { text: '', who: '' };   // отзыв клиента (только с его согласия)
 
@@ -295,6 +321,55 @@
     document.getElementById('reviewWho').textContent = REVIEW.who;
     document.getElementById('review').hidden = false;
   }
+
+  // Калькулятор стоимости: примерная цена по ответам, заявка уходит в Telegram с ответами
+  (function () {
+    const box = document.getElementById('calcBox'), res = document.getElementById('calcRes');
+    const A = {};
+    const L = {
+      sphere: { services: 'услуги', edu: 'обучение', trade: 'торговля', opt: 'опт, дистрибуция, производство' },
+      turn: { 1: 'до 5 млн', 2: '5-20 млн', 3: 'больше 20 млн' }, points: { 1: '1', 2: '2-3', 3: '4 и больше' },
+      soft: { none: 'нигде или в тетради', excel: 'Excel', altegio: 'Altegio, YCLIENTS и т.п.', '1c': '1С' },
+      selfkind: { where: 'понять, куда уходят деньги', debt: 'кредиты и долги', save: 'начать копить' } };
+    const n = v => v.toLocaleString('ru-RU').replace(/,/g, ' ');
+    function calc() {
+      if (A.who === 'self') {
+        if (!A.selfkind) return null;
+        return { tier: 'Личные финансы', setup: [40000, 60000], month: [20000, 20000], gift: true, diag: false,
+          text: 'Личные финансы, главное: ' + L.selfkind[A.selfkind] };
+      }
+      if (!A.sphere || !A.turn || !A.points || !A.soft) return null;
+      let lvl = Math.max(+A.turn, +A.points);
+      if (A.sphere === 'opt' || A.soft === '1c') lvl = Math.max(lvl, 2);
+      if (A.sphere === 'opt' && +A.turn === 3) lvl = 3;
+      const T = { 1: ['Малый бизнес', [100000, 150000], [100000, 150000], true], 2: ['Бизнес с несколькими точками', [150000, 250000], [150000, 250000], true], 3: ['Средний бизнес', [300000, 500000], [300000, 400000], false] }[lvl];
+      return { tier: T[0], setup: T[1], month: T[2], gift: T[3], diag: true,
+        text: 'Бизнес: ' + L.sphere[A.sphere] + ', оборот ' + L.turn[A.turn] + ', точек ' + L.points[A.points] + ', учёт: ' + L.soft[A.soft] };
+    }
+    function range(r) { return r[0] === r[1] ? n(r[0]) + ' тг' : 'от ' + n(r[0]) + ' до ' + n(r[1]) + ' тг'; }
+    function render() {
+      box.querySelectorAll('.biz').forEach(q => q.hidden = A.who === 'self');
+      box.querySelectorAll('.self').forEach(q => q.hidden = A.who !== 'self');
+      const r = calc();
+      if (!r) { res.hidden = true; return; }
+      const msg = 'Здравствуйте! Рассчитал(а) стоимость на сайте. ' + r.text + '. Примерно: внедрение ' + range(r.setup) + ', сопровождение ' + range(r.month) + ' в месяц. Хочу обсудить.';
+      res.hidden = false;
+      res.innerHTML = '<div class="res"><div class="muted">Ваш вариант</div><div class="big">' + r.tier + '</div>' +
+        (r.diag ? '<div class="row"><span>Первый шаг: диагностика за неделю</span><b>50 000 тг</b></div>' : '') +
+        '<div class="row"><span>Внедрение</span><b>' + range(r.setup) + '</b></div>' +
+        '<div class="row"><span>Сопровождение в месяц</span><b>' + range(r.month) + '</b></div>' +
+        (r.gift ? '<div class="row"><span>🎁 До 31 декабря</span><b>первый месяц в подарок</b></div>' : '') +
+        (r.diag ? '<p class="muted" style="margin:8px 0 0;font-size:13px">Диагностика засчитывается во внедрение, если продолжаем.</p>' : '') +
+        '<p class="muted" style="margin:8px 0 0;font-size:13px">Это примерная цена. Точную назовём после короткого разговора, без вашего согласия она не меняется.</p>' +
+        '<a class="btn btn-gold" style="margin-top:12px" target="_blank" rel="noopener" href="' + CONTACT + '?text=' + encodeURIComponent(msg) + '">Отправить расчёт в Telegram</a></div>';
+    }
+    box.querySelectorAll('.q').forEach(q => q.querySelectorAll('button').forEach(b => b.onclick = () => {
+      A[q.dataset.q] = b.dataset.v;
+      q.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
+      render();
+      if (!res.hidden) res.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }));
+  })();
 </script>
 </body>
 </html>
