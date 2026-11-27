@@ -1660,19 +1660,10 @@ function drawPersonal() {
   $app.querySelectorAll('[data-pm]').forEach(c => c.onclick = () => { if (ms.includes(c.dataset.pm)) { PM = c.dataset.pm; drawPersonal(); } });
 }
 
-// ====== Аналитика: что важно и на что обратить внимание, в бизнесе и в личном ======
-let ANV = 'biz';
-function anHead() {
-  return `<h1>Аналитика ✦</h1><div class="chips seg">${[['biz', 'Бизнес'], ['pers', 'Личное'], ['all', 'Сводный']].filter(x => ME.user.approver || x[0] === 'pers').map(([k, t]) => `<button class="chip ${k === ANV ? 'on' : ''}" data-anv="${k}">${t}</button>`).join('')}</div>`;
-}
-function renderAn() {
-  if (TAB !== 'an') return;
-  if (!ME.user.approver) ANV = 'pers';   // без отчетов бизнеса: только личное
-  if (ANV !== 'pers' && !REP) return load('reports', {}, { wait: () => { $app.innerHTML = anHead() + '<div class="center"><div class="spin"></div>Считаю…</div>'; }, alive: () => TAB === 'an', fail: failCard, draw: d => { REP = d; if (REP.months.length && !(REP.months.includes(PFROM) && REP.months.includes(PTO))) PFROM = PTO = REP.factTo || REP.months[REP.months.length - 1]; renderAn(); } });
-  if (ANV !== 'biz' && !PDATA) return load('personal', {}, { wait: () => { $app.innerHTML = anHead() + '<div class="center"><div class="spin"></div>Считаю…</div>'; }, alive: () => TAB === 'an', fail: failCard, draw: d => { PDATA = d; renderAn(); } });
-  if (ANV === 'pers') { PONLY = true; PTAB = 'an'; drawPersonal(); PONLY = false; return; }
-  const R = REP, m = R.factTo, i = R.months.indexOf(m);
-  if (i < 0) { $app.innerHTML = anHead() + '<div class="card muted">Фактических данных пока нет.</div>'; return; }
+// Выводы по бизнесу за последний закрытый месяц (для «Аналитики» и карточки «Главное» на «Что сегодня»)
+function bizItems(R) {
+  const m = R.factTo, i = R.months.indexOf(m);
+  if (i < 0) return null;
   const X = plCalc(R, [i]), Xp = i > 0 ? plCalc(R, [i - 1]) : null, F = X.F, Fp = Xp ? Xp.F : null;
   const ch = (a, b) => b ? Math.round((a / b - 1) * 100) : null;
   const sg = v => (v > 0 ? '+' : '') + v + '%';
@@ -1695,6 +1686,34 @@ function renderAn() {
   const dl = R.lines.filter(l => l.sec === 'ДДС'), endL = dl.find(l => l.grp === 'Остаток на конец');
   if (endL && endL.fact[i] !== null) { const cash = endL.fact[i] || 0; add(cash < F.fx * 0.5 ? 'warn' : 'ok', 'Деньги на счете на конец месяца', tg0(cash), cash < F.fx * 0.5 ? 'меньше половины постоянных расходов месяца: держите запас на слабый месяц (январь обычно ниже).' : 'запас на месяц есть.', cash < F.fx * 0.5 ? 6 : 1); }
   items.sort((a, b) => b.w - a.w);
+  return { R, m, i, X, F, items, rc, mg, L };
+}
+// Карточка «Главное за месяц»: самое важное из «Аналитики» на первом экране
+function mainCardHtml(R) {
+  const B = R && bizItems(R); if (!B) return '';
+  const top = B.items.find(x => x.c !== 'ok') || B.items[0]; if (!top) return '';
+  const col = { bad: 'var(--bad)', warn: 'var(--warn)', ok: 'var(--ok)' }, more = B.items.filter(x => x.c !== 'ok').length - (top.c !== 'ok' ? 1 : 0);
+  return `<div class="card doc" id="mainGo" style="border:1.5px solid ${col[top.c]}">
+    <div class="row"><span class="muted">Главное за ${mLabel(B.m)}</span><span>›</span></div>
+    <div style="display:flex;gap:10px;margin-top:6px"><span class="dot" style="background:${col[top.c]};margin-top:6px;flex:none"></span><div style="flex:1;min-width:0"><div class="row"><b>${esc(top.t)}</b><b style="color:${col[top.c]};white-space:nowrap">${top.v}</b></div><div class="muted">${top.d}</div></div></div>
+    <div class="muted" style="margin-top:6px;font-size:13px">Выручка ${tg0(B.F.rev)} · прибыль ${tg0(B.F.net)} (${B.mg}%)${more > 0 ? ` · ещё ${more} ${plural(more, 'пункт', 'пункта', 'пунктов')} в «Аналитике»` : ''}</div>
+  </div>`;
+}
+function setRep(d) { REP = d; if (REP.months.length && !(REP.months.includes(PFROM) && REP.months.includes(PTO))) PFROM = PTO = REP.factTo || REP.months[REP.months.length - 1]; }
+// ====== Аналитика: что важно и на что обратить внимание, в бизнесе и в личном ======
+let ANV = 'biz';
+function anHead() {
+  return `<h1>Аналитика ✦</h1><div class="chips seg">${[['biz', 'Бизнес'], ['pers', 'Личное'], ['all', 'Сводный']].filter(x => ME.user.approver || x[0] === 'pers').map(([k, t]) => `<button class="chip ${k === ANV ? 'on' : ''}" data-anv="${k}">${t}</button>`).join('')}</div>`;
+}
+function renderAn() {
+  if (TAB !== 'an') return;
+  if (!ME.user.approver) ANV = 'pers';   // без отчетов бизнеса: только личное
+  if (ANV !== 'pers' && !REP) return load('reports', {}, { wait: () => { $app.innerHTML = anHead() + '<div class="center"><div class="spin"></div>Считаю…</div>'; }, alive: () => TAB === 'an', fail: failCard, draw: d => { setRep(d); renderAn(); } });
+  if (ANV !== 'biz' && !PDATA) return load('personal', {}, { wait: () => { $app.innerHTML = anHead() + '<div class="center"><div class="spin"></div>Считаю…</div>'; }, alive: () => TAB === 'an', fail: failCard, draw: d => { PDATA = d; renderAn(); } });
+  if (ANV === 'pers') { PONLY = true; PTAB = 'an'; drawPersonal(); PONLY = false; return; }
+  const B = bizItems(REP);
+  if (!B) { $app.innerHTML = anHead() + '<div class="card muted">Фактических данных пока нет.</div>'; return; }
+  const { R, m, i, F, items, rc, mg, L } = B;
   const col = { bad: 'var(--bad)', warn: 'var(--warn)', ok: 'var(--ok)' };
   const card = x => `<div style="display:flex;gap:10px;padding:8px 0;border-top:1px solid var(--line)"><span class="dot" style="background:${col[x.c]};margin-top:6px;flex:none"></span><div style="flex:1;min-width:0"><div class="row"><b>${esc(x.t)}</b><b style="color:${col[x.c]};white-space:nowrap">${x.v}</b></div><div class="muted">${x.d}</div></div></div>`;
   const bad = items.filter(x => x.c !== 'ok'), good = items.filter(x => x.c === 'ok');
@@ -1809,7 +1828,16 @@ function renderHome() {
 // «Что сегодня»: проверяющим (Арайлым, собственник) итоги Altegio, сколько кому положено и что требует внимания;
 // продавцу кнопки загрузки, записи на завтра без подтверждения, её заработок за месяц и её документы.
 // Документы за месяц (как раньше) свёрнуты внизу.
-let TODAY = null;
+let TODAY = null, MAINAT = 0;
+// «Главное за месяц» на «Что сегодня»: сначала то, что запомнено, свежие отчёты следом
+function mainCard() {
+  const put = () => { const el = document.getElementById('tdMain'); if (!el || TAB !== 'home') return; try { el.innerHTML = mainCardHtml(REP); } catch (e) { el.innerHTML = ''; } const c = document.getElementById('mainGo'); if (c) c.onclick = () => { ANV = 'biz'; go('an'); }; };
+  if (!REP) { const old = cget(ckey('reports', {})); if (old) setRep(old); }
+  put();
+  if (Date.now() - MAINAT < 600000) return;   // свежие отчёты не чаще раза в 10 минут
+  MAINAT = Date.now();
+  api('reports', {}).then(d => { cput(ckey('reports', {}), d); setRep(d); put(); }).catch(() => { MAINAT = 0; });
+}
 function drawHome(s) {
   loadOpen();
   const [y, m] = MONTH.split('-'), A = ME.user.approver, now = new Date();
@@ -1847,6 +1875,7 @@ function drawHome(s) {
     <div class="muted" style="margin:-6px 2px 10px">${esc(ME.client.name)} · ${now.getDate()} ${MONTHS_GEN[now.getMonth()]}, ${WDS_FULL[now.getDay()]}</div>`;
   if (A) {
     $app.innerHTML = head + `
+      <div id="tdMain">${REP ? mainCardHtml(REP) : ''}</div>
       <div class="card" id="tdAlt"><div class="row"><span class="muted">Сегодня (касса)</span><b>…</b></div></div>
       <h2>Требует внимания</h2>
       <div class="card" id="tdAttn">${attnHtml(s, TODAY)}</div>
@@ -1855,6 +1884,7 @@ function drawHome(s) {
       <div class="card" id="tdCash"><div class="muted">Считаю…</div></div>
       ${(() => { const o = BLK.has('hdocs+');   // по умолчанию свёрнуто
         return `<h2 class="tg blk" data-blk="hdocs+"><span>${arrow(o)}Документы за месяц</span>${o ? '' : `<span class="bsum">${money(s.approved)}</span>`}</h2>${o ? docsHtml : ''}`; })()}`;
+    mainCard();
   } else {
     $app.innerHTML = head + `
       <div class="grid2">
