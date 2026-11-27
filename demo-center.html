@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>«Демо-центр» (учёт учебного центра): EsepDos</title>
+<link rel="icon" type="image/svg+xml" href="logo.svg">
+<link rel="icon" type="image/png" href="favicon.png">
+<meta name="description" content="Пример учёта учебного центра: ученики и абонементы, посещаемость, зарплата учителей или доли партнёров, аренда и прибыль.">
+<style>
+  :root{--teal:#1f9e90;--tealbg:#e8f6f4;--ink:#12161c;--hint:#5b6470;--line:#e4e7eb;--bg:#f6f7f9;--card:#fff;--red:#d64545;--redbg:#fdecec;--amber:#b7791f;--amberbg:#fdf4e3}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--ink);background:var(--bg);line-height:1.45;-webkit-font-smoothing:antialiased}
+  .app{max-width:480px;margin:0 auto;min-height:100vh;padding-bottom:84px}
+  .top{position:sticky;top:0;z-index:5;background:rgba(246,247,249,.95);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:10px 16px}
+  .top .row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .back{font-size:14px;color:var(--teal);text-decoration:none;font-weight:600}
+  .badge{font-size:11px;font-weight:700;color:var(--amber);background:var(--amberbg);padding:3px 8px;border-radius:999px}
+  .ttl{font-size:19px;font-weight:700;margin-top:6px}
+  .seg{display:flex;background:#e9ecef;border-radius:12px;padding:3px;margin-top:8px}
+  .seg button{flex:1;border:0;background:none;font:inherit;font-size:13px;padding:7px 4px;border-radius:9px;cursor:pointer;color:var(--hint)}
+  .seg button.on{background:#fff;color:var(--ink);font-weight:700;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+  .role{display:flex;gap:6px;margin-top:8px;overflow-x:auto;scrollbar-width:none;align-items:center}
+  main{padding:14px 16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px}
+  .tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+  .tile{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px}
+  .tile .l{font-size:12px;color:var(--hint)} .tile .v{font-size:20px;font-weight:700;margin-top:2px} .tile .n{font-size:12px;color:var(--hint);margin-top:2px}
+  .tile.hl{background:var(--tealbg);border-color:transparent} .tile.hl .v{color:#11665c}
+  h3{font-size:16px;margin:4px 0 10px}
+  .muted{color:var(--hint);font-size:13px}
+  .line{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid var(--line);font-size:14px}
+  .line:first-of-type{border-top:0} .line b{white-space:nowrap}
+  .line.tot{font-weight:700;border-top:2px solid var(--ink)}
+  .neg{color:var(--red)} .pos{color:#11665c}
+  .chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:10px;scrollbar-width:none}
+  .chip{flex:none;font-size:13px;padding:6px 11px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer;font-family:inherit}
+  .chip.on{background:var(--teal);border-color:var(--teal);color:#fff}
+  .ls{display:flex;gap:10px;padding:11px 0;border-top:1px solid var(--line);cursor:pointer;align-items:flex-start}
+  .ls:first-child{border-top:0}
+  .tm{width:50px;flex:none;font-weight:700} .tm small{display:block;font-weight:400;color:var(--hint);font-size:11px}
+  .ls .rt{margin-left:auto;text-align:right;font-size:13px;white-space:nowrap}
+  .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:middle}
+  .pill{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px}
+  .p-ok{background:var(--tealbg);color:#11665c} .p-wait{background:#eef2f7;color:#475569} .p-warn{background:var(--amberbg);color:var(--amber)} .p-no{background:var(--redbg);color:var(--red)}
+  .st{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line);cursor:pointer}
+  .st:first-child{border-top:0}
+  .ava{width:36px;height:36px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff}
+  .att{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+  .att:first-child{border-top:0}
+  .tog{margin-left:auto;display:flex;gap:6px}
+  .tog button{border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:6px 10px;font:inherit;font-size:13px;cursor:pointer}
+  .tog button.yes{background:var(--teal);border-color:var(--teal);color:#fff}
+  .tog button.no{background:var(--redbg);border-color:var(--red);color:var(--red)}
+  .search input{width:100%;font:inherit;font-size:15px;padding:11px 12px;border:1.5px solid var(--line);border-radius:12px;background:#fff;outline:none;margin-bottom:10px}
+  .nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);padding:6px 0 calc(6px + env(safe-area-inset-bottom))}
+  .nav .in{max-width:480px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
+  .nav button{border:0;background:none;font-family:inherit;font-size:11px;color:var(--hint);padding:4px 0;cursor:pointer}
+  .nav button span{display:block;font-size:21px;line-height:1.2}
+  .nav button.on{color:var(--teal);font-weight:700}
+  .nav button.hide{display:none}
+  .sheet{position:fixed;inset:0;background:rgba(18,22,28,.45);display:none;align-items:flex-end;justify-content:center;z-index:20}
+  .sheet.open{display:flex}
+  .sheet .box{background:var(--bg);width:100%;max-width:480px;max-height:88vh;overflow:auto;border-radius:20px 20px 0 0;padding:16px}
+  .close{float:right;border:0;background:#fff;border-radius:999px;width:32px;height:32px;font-size:18px;cursor:pointer}
+  .btn{display:block;width:100%;text-align:center;font:inherit;font-weight:700;font-size:15px;padding:13px;border-radius:12px;border:0;cursor:pointer;margin-top:8px;text-decoration:none}
+  .btn-teal{background:var(--teal);color:#fff} .btn-ghost{background:#fff;color:var(--teal);border:1.5px solid var(--teal)}
+  .note{background:var(--tealbg);color:#1d4a45;border-radius:12px;padding:10px 12px;font-size:13px;margin-bottom:12px}
+  .bot{background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 12px;font-size:14px;margin-top:8px}
+  .bot.me{background:#e7f6e7;margin-left:40px} .bot.it{margin-right:30px}
+  .toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:14px;padding:10px 14px;border-radius:12px;opacity:0;transition:.25s;pointer-events:none;z-index:30;max-width:90%}
+  .toast.on{opacity:1}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top">
+    <div class="row"><a class="back" href="./">‹ О сервисе и цены</a><span class="badge">ДЕМО · данные вымышленные</span></div>
+    <div class="ttl" id="ttl">Учебный центр «Bilim»</div>
+    <div class="seg" id="mode"><button data-mode="teach" class="on">Хозяин и учителя</button><button data-mode="part">Трое партнёров</button></div>
+    <div class="role" id="roles"></div>
+  </div>
+  <main id="view"></main>
+</div>
+<nav class="nav"><div class="in">
+  <button data-t="today" class="on"><span>📅</span>Занятия</button>
+  <button data-t="students"><span>🧒</span>Ученики</button>
+  <button data-t="people"><span>👩‍🏫</span><b id="peopleTab" style="font-weight:inherit">Учителя</b></button>
+  <button data-t="money" data-owner="1"><span>💰</span>Деньги</button>
+</div></nav>
+<div class="sheet" id="sheet"><div class="box" id="sheetBox"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+// Демо учёта учебного центра: всё считается в браузере, данные вымышленные, ничего не сохраняется.
+(function () {
+  const fmt = n => Math.round(n).toLocaleString('ru-RU').replace(/,/g, ' ');
+  const tg = n => fmt(n) + ' ₸';
+  let seed = 5;
+  const rnd = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
+  const pick = a => a[Math.floor(rnd() * a.length)];
+
+  // люди: в режиме «учителя» это наёмные учителя у хозяина, в режиме «партнёры» трое совладельцев
+  const P = [
+    { id: 'a', name: 'Айжан', color: '#1f9e90', subj: 'Английский', pay: 'pct', pct: 0.45 },
+    { id: 'm', name: 'Марина', color: '#8a5cc4', subj: 'Английский', pay: 'pct', pct: 0.45 },
+    { id: 'e', name: 'Ерлан', color: '#c4703b', subj: 'Английский, индивидуально', pay: 'lesson', rate: 4000 },
+  ];
+  const PART_SUBJ = { a: 'Английский', m: 'Математика', e: 'Подготовка к школе' };
+  const G = [
+    { id: 1, n: 'Kids A1', who: 'a', days: [1, 3], t: '16:00', room: 'Кабинет 1', price: 32000, kind: 'group' },
+    { id: 2, n: 'Kids A2', who: 'a', days: [2, 4], t: '17:00', room: 'Кабинет 1', price: 32000, kind: 'group' },
+    { id: 3, n: 'Teens B1', who: 'm', days: [1, 3], t: '18:00', room: 'Кабинет 2', price: 36000, kind: 'group' },
+    { id: 4, n: 'Adults Speaking', who: 'm', days: [2, 5], t: '19:30', room: 'Кабинет 2', price: 38000, kind: 'group' },
+    { id: 5, n: 'IELTS', who: 'm', days: [6], t: '11:00', room: 'Кабинет 2', price: 45000, kind: 'group' },
+    { id: 6, n: 'Индивидуально', who: 'e', days: [1, 2, 3, 4, 5], t: '15:00', room: 'Кабинет 3', price: 6000, kind: 'ind' },
+    { id: 7, n: 'Подготовка к школе', who: 'e', days: [2, 4], t: '10:00', room: 'Кабинет 1', price: 30000, kind: 'group' },
+  ];
+  const PART_G = { 1: 'Английский: малыши', 2: 'Английский: дети', 3: 'Математика 5-6 класс', 4: 'Математика 7-8 класс', 5: 'Математика: ЕНТ', 6: 'Индивидуально', 7: 'Подготовка к школе' };
+  const PART_WHO = { 1: 'a', 2: 'a', 3: 'm', 4: 'm', 5: 'm', 6: 'e', 7: 'e' };
+  const NAMES = ['Алихан', 'Амина', 'Айсулу', 'Тимур', 'Дильназ', 'Арсен', 'Камила', 'Нурислам', 'Аяла', 'Санжар', 'Медина', 'Ислам', 'Жасмин', 'Ерасыл', 'Томирис', 'Данияр', 'Аружан', 'Алан', 'Сафия', 'Рамазан', 'Айым', 'Ансар', 'Малика', 'Бекжан', 'Зере', 'Адиль', 'Ясмин', 'Нурали', 'Дана', 'Мирас', 'Асель', 'Ильяс', 'Лейла', 'Алдияр', 'Мадина', 'Тамерлан', 'Карина', 'Олжас', 'Самира', 'Эмир', 'Айдана', 'Руслан'];
+  const COL = ['#3b82c4', '#c43b6e', '#5a9e3b', '#b7791f', '#8a5cc4', '#1f9e90', '#c4703b'];
+
+  const S = [];
+  let sid = 1, ni = 0;
+  G.forEach(g => {
+    const n = g.kind === 'ind' ? 6 : 5 + Math.floor(rnd() * 3);
+    for (let k = 0; k < n; k++) {
+      const name = NAMES[ni++ % NAMES.length];
+      const lessons = g.kind === 'ind' ? 4 + Math.floor(rnd() * 5) : 8;
+      const paid = rnd() < 0.85;
+      const left = paid ? Math.floor(rnd() * 7) : 0;
+      S.push({ id: sid++, name, g: g.id, color: COL[sid % COL.length], parent: (g.n.startsWith('Adults') || g.n === 'IELTS') ? '' : 'мама: +7 700 000 ' + String(20 + sid).padStart(2, '0') + ' ' + String(30 + sid).padStart(2, '0'),
+        sum: g.kind === 'ind' ? g.price * lessons : g.price, paid, left, lessons, pay: paid ? pick(['Kaspi', 'Kaspi', 'Kaspi', 'Наличные']) : '' });
+    }
+  });
+
+  const TODAY = new Date(2026, 10, 27); // пятница
+  let MODE = 'teach', ROLE = 'owner', tab = 'today', dayOff = 0, gf = 'all', q = '';
+  const ATT = {};   // отметки посещаемости в демо
+  const V = document.getElementById('view');
+  const toast = t => { const e = document.getElementById('toast'); e.textContent = t; e.classList.add('on'); setTimeout(() => e.classList.remove('on'), 2300); };
+  const PP = id => P.find(p => p.id === id);
+  const who = g => MODE === 'part' ? PART_WHO[g.id] : g.who;
+  const gname = g => MODE === 'part' ? PART_G[g.id] : g.n;
+  const pname = p => p.name + (MODE === 'part' ? ' (партнёр)' : '');
+  const DAYS = ['вс', 'пн', 'вт', 'ср', 'чт', 'пт', 'сб'];
+  const MON = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
+  const mineG = g => ROLE === 'owner' || who(g) === ROLE;
+  const status = s => !s.paid ? ['Не оплачен', 'p-no'] : s.left <= 1 ? ['Осталось ' + s.left, 'p-warn'] : ['Осталось ' + s.left, 'p-ok'];
+
+  function head() {
+    document.querySelectorAll('#mode button').forEach(b => b.classList.toggle('on', b.dataset.mode === MODE));
+    document.getElementById('peopleTab').textContent = MODE === 'part' ? 'Партнёры' : 'Учителя';
+    const r = [['owner', MODE === 'part' ? 'Общий вид' : 'Хозяин'], ...P.map(p => [p.id, (MODE === 'part' ? 'Партнёр ' : 'Учитель ') + p.name])];
+    document.getElementById('roles').innerHTML = '<span class="muted" style="flex:none">Смотрю как:</span>' + r.map(([k, n]) => `<button class="chip ${ROLE === k ? 'on' : ''}" data-r="${k}">${n}</button>`).join('');
+    document.querySelectorAll('[data-r]').forEach(b => b.onclick = () => {
+      ROLE = b.dataset.r; gf = 'all'; if (ROLE !== 'owner' && tab === 'money') tab = 'today'; render();
+      toast(ROLE === 'owner' ? 'Видно всё: все группы, деньги, зарплаты' : MODE === 'part' ? 'Партнёр видит свои группы и свою долю' : 'Учитель видит только свои группы, отмечает посещаемость и видит свою зарплату');
+    });
+    document.querySelectorAll('[data-owner]').forEach(b => b.classList.toggle('hide', ROLE !== 'owner'));
+  }
+
+  function today() {
+    const d = new Date(TODAY); d.setDate(d.getDate() + dayOff);
+    const list = G.filter(g => g.days.includes(d.getDay()) && mineG(g)).sort((a, b) => a.t.localeCompare(b.t));
+    const ending = S.filter(s => s.paid && s.left <= 1 && mineG(G.find(g => g.id === s.g)));
+    const unpaid = S.filter(s => !s.paid && mineG(G.find(g => g.id === s.g)));
+    V.innerHTML = `
+      ${ROLE === 'owner' && dayOff === 0 ? `<div class="note">Так выглядит учёт учебного центра в EsepDos. Вверху переключите «${MODE === 'part' ? 'Трое партнёров' : 'Хозяин и учителя'}» и «Смотрю как». Нажмите на занятие, чтобы отметить, кто пришёл.</div>` : ''}
+      <div class="chips"><button class="chip" id="prev">‹</button><button class="chip on" style="min-width:170px">${dayOff === 0 ? 'Сегодня, ' : ''}${d.getDate()} ${MON[d.getMonth()]}, ${DAYS[d.getDay()]}</button><button class="chip" id="next">›</button></div>
+      <div class="tiles">
+        <div class="tile ${unpaid.length ? '' : 'hl'}"><div class="l">Не оплатили</div><div class="v ${unpaid.length ? 'neg' : ''}">${unpaid.length}</div><div class="n">${tg(unpaid.reduce((t, s) => t + s.sum, 0))}</div></div>
+        <div class="tile"><div class="l">Абонемент заканчивается</div><div class="v">${ending.length}</div><div class="n">напомнить родителям</div></div>
+      </div>
+      <div class="card"><h3>Занятия</h3>${list.map(g => {
+        const p = PP(who(g)), k = dkey(d) + g.id, a = ATT[k];
+        const n = S.filter(s => s.g === g.id).length;
+        return `<div class="ls" data-g="${g.id}"><div class="tm">${g.t}<small>${g.room.replace('Кабинет ', 'каб. ')}</small></div>
+          <div><div style="font-weight:600">${gname(g)}</div><div class="muted"><span class="dot" style="background:${p.color}"></span>${p.name} · ${n} уч.</div></div>
+          <div class="rt">${a ? `<span class="pill p-ok">Отмечено ${a.filter(Boolean).length}/${a.length}</span>` : '<span class="pill p-wait">Отметить</span>'}</div></div>`;
+      }).join('') || '<div class="muted">В этот день занятий нет</div>'}</div>
+      <div class="card"><h3>💬 Учитель может отмечать и через бота</h3>
+        <div class="bot me">Kids A1: не было Арсена и Камилы</div>
+        <div class="bot it">✅ Отметил: Kids A1, 27.11, пришли 5 из 7. У Алихана остался 1 урок по абонементу, напомнить маме об оплате?</div>
+      </div>`;
+    document.getElementById('prev').onclick = () => { dayOff--; today(); };
+    document.getElementById('next').onclick = () => { dayOff++; today(); };
+    V.querySelectorAll('[data-g]').forEach(e => e.onclick = () => attend(+e.dataset.g, d));
+  }
+  const dkey = d => d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate() + ':';
+
+  function attend(gid, d) {
+    const g = G.find(x => x.id === gid), st = S.filter(s => s.g === gid), k = dkey(d) + gid;
+    const cur = ATT[k] ? ATT[k].slice() : st.map(() => null);
+    const draw = () => {
+      open(`<button class="close" data-x>×</button><h3>${gname(g)} · ${g.t}</h3><div class="muted">${d.getDate()} ${MON[d.getMonth()]} · ${g.room} · ${PP(who(g)).name}</div>
+        <div class="card" style="margin-top:12px">${st.map((s, i) => { const [t, c] = status(s); return `<div class="att"><div class="ava" style="background:${s.color}">${s.name[0]}</div><div><div style="font-weight:600">${s.name}</div><span class="pill ${c}">${t}</span></div>
+          <div class="tog"><button class="${cur[i] === true ? 'yes' : ''}" data-i="${i}" data-v="1">Был</button><button class="${cur[i] === false ? 'no' : ''}" data-i="${i}" data-v="0">Нет</button></div></div>`; }).join('')}</div>
+        <button class="btn btn-teal" id="saveAtt">Сохранить посещаемость</button>
+        <div class="muted" style="margin-top:8px">При отметке «Был» с абонемента списывается урок. Когда остаётся 1, бот напоминает родителям об оплате.</div>`);
+      document.querySelectorAll('.tog button').forEach(b => b.onclick = () => { cur[+b.dataset.i] = b.dataset.v === '1'; draw(); });
+      document.getElementById('saveAtt').onclick = () => {
+        const all = cur.map(v => v !== false);
+        if (!ATT[k]) st.forEach((s, i) => { if (all[i] && s.left > 0) s.left--; });
+        ATT[k] = all; close(); render(); toast('Посещаемость сохранена, уроки списаны (в демо не сохраняется)');
+      };
+    };
+    draw();
+  }
+
+  function students() {
+    const gs = G.filter(mineG);
+    const list = S.filter(s => gs.some(g => g.id === s.g)).filter(s => gf === 'all' || (gf === 'unpaid' ? !s.paid : gf === 'end' ? s.paid && s.left <= 1 : s.g === +gf))
+      .filter(s => !q || s.name.toLowerCase().includes(q));
+    V.innerHTML = `
+      <div class="search"><input id="q" placeholder="Имя ученика" value="${q}"></div>
+      <div class="chips">${[['all', 'Все'], ['unpaid', 'Не оплатили'], ['end', 'Заканчивается'], ...gs.map(g => [String(g.id), gname(g)])].map(([k, n]) => `<button class="chip ${gf === k ? 'on' : ''}" data-f="${k}">${n}</button>`).join('')}</div>
+      <div class="muted" style="margin-bottom:6px">${list.length} учеников · оплачено ${tg(list.filter(s => s.paid).reduce((t, s) => t + s.sum, 0))}</div>
+      <div class="card">${list.map(s => { const g = G.find(x => x.id === s.g), [t, c] = status(s); return `<div class="st" data-s="${s.id}"><div class="ava" style="background:${s.color}">${s.name[0]}</div>
+        <div><div style="font-weight:600">${s.name}</div><div class="muted">${gname(g)} · ${PP(who(g)).name}</div></div>
+        <div style="margin-left:auto;text-align:right"><span class="pill ${c}">${t}</span><div class="muted" style="margin-top:3px">${tg(s.sum)}</div></div></div>`; }).join('') || '<div class="muted">Никого нет</div>'}</div>`;
+    V.querySelectorAll('[data-f]').forEach(b => b.onclick = () => { gf = b.dataset.f; students(); });
+    const i = document.getElementById('q');
+    i.oninput = () => { q = i.value.trim().toLowerCase(); const p = i.selectionStart; students(); const n = document.getElementById('q'); n.focus(); n.setSelectionRange(p, p); };
+    V.querySelectorAll('[data-s]').forEach(e => e.onclick = () => sCard(+e.dataset.s));
+  }
+  function sCard(id) {
+    const s = S.find(x => x.id === id), g = G.find(x => x.id === s.g), [t, c] = status(s);
+    open(`<button class="close" data-x>×</button><h3>${s.name}</h3><div class="muted">${gname(g)} · ${PP(who(g)).name}${s.parent ? ' · ' + s.parent : ''}</div>
+      <div class="card" style="margin-top:12px">
+        <div class="line"><span>${g.kind === 'ind' ? 'Пакет уроков' : 'Абонемент'}</span><b>${s.lessons} уроков · ${tg(s.sum)}</b></div>
+        <div class="line"><span>Оплата</span><b>${s.paid ? 'оплачено, ' + s.pay : '<span class="neg">не оплачено</span>'}</b></div>
+        <div class="line"><span>Статус</span><b><span class="pill ${c}">${t}</span></b></div>
+      </div>
+      ${!s.paid ? '<button class="btn btn-teal" id="pay">Отметить оплату</button>' : ''}
+      <button class="btn btn-ghost" id="rem">${s.paid ? 'Напомнить о продлении' : 'Напомнить об оплате'}</button>`);
+    const p = document.getElementById('pay'); if (p) p.onclick = () => { s.paid = true; s.pay = 'Kaspi'; s.left = s.lessons; close(); render(); toast('Оплата отмечена (в демо не сохраняется)'); };
+    document.getElementById('rem').onclick = () => toast('Бот отправит родителю напоминание (в демо не отправляется)');
+  }
+
+  // деньги за ноябрь: по каждому человеку
+  function calc() {
+    const rent = 280000, ads = 70000, other = 35000;
+    const rows = P.map(p => {
+      const gs = G.filter(g => who(g) === p.id);
+      const st = S.filter(s => gs.some(g => g.id === s.g));
+      const rev = st.filter(s => s.paid).reduce((t, s) => t + s.sum, 0); // ноябрь: оплаченные абонементы
+      let pay = 0;
+      if (MODE === 'teach') pay = p.pay === 'pct' ? rev * p.pct : p.rate * 28;
+      return { p, gs, st, rev, pay };
+    });
+    const rev = rows.reduce((t, r) => t + r.rev, 0), tax = rev * 0.03;
+    const common = rent + ads + other + tax;
+    return { rows, rev, rent, ads, other, tax, common };
+  }
+
+  function people() {
+    const c = calc();
+    if (MODE === 'part') {
+      const show = c.rows.filter(r => ROLE === 'owner' || r.p.id === ROLE);
+      V.innerHTML = `
+        <div class="note">Оплата приходит на одно ИП, а каждый партнёр видит, сколько заработал сам. Общие расходы (аренда, реклама, налог) делятся на троих поровну, долю можно настроить.</div>
+        ${show.map(r => { const share = c.common / 3, net = r.rev - share; return `<div class="card"><h3><span class="dot" style="background:${r.p.color}"></span>${r.p.name} · ${PART_SUBJ[r.p.id]}</h3>
+          <div class="line"><span>Оплаты его учеников (${r.st.length})</span><b>${tg(r.rev)}</b></div>
+          <div class="line"><span>Его доля общих расходов, 1/3</span><b class="neg">−${tg(share)}</b></div>
+          <div class="line tot"><span>Перевести ${r.p.name} за ноябрь</span><b class="pos">${tg(net)}</b></div>
+          <div class="muted" style="margin-top:6px">Группы: ${r.gs.map(gname).join(', ')}</div></div>`; }).join('')}
+        ${ROLE === 'owner' ? `<div class="card"><h3>Общие расходы ноября</h3>
+          <div class="line"><span>Аренда</span><b>${tg(c.rent)}</b></div><div class="line"><span>Реклама</span><b>${tg(c.ads)}</b></div>
+          <div class="line"><span>Связь, Kaspi, хозтовары</span><b>${tg(c.other)}</b></div><div class="line"><span>Налог ИП (пример 3%)</span><b>${tg(c.tax)}</b></div>
+          <div class="line tot"><span>Итого, на каждого по ${tg(c.common / 3)}</span><b>${tg(c.common)}</b></div></div>` : ''}`;
+      return;
+    }
+    const show = c.rows.filter(r => ROLE === 'owner' || r.p.id === ROLE);
+    V.innerHTML = `
+      <div class="note">Зарплата считается сама по отметкам и оплатам: процент от оплат учеников группы или фиксированно за урок.</div>
+      ${show.map(r => `<div class="card"><h3><span class="dot" style="background:${r.p.color}"></span>${r.p.name}</h3>
+        <div class="muted" style="margin-bottom:6px">${r.p.pay === 'pct' ? 'Процент: ' + Math.round(r.p.pct * 100) + '% от оплат учеников' : 'Фиксированно: ' + tg(r.p.rate) + ' за урок'}</div>
+        <div class="line"><span>Групп и учеников</span><b>${r.gs.length} · ${r.st.length}</b></div>
+        <div class="line"><span>Оплаты учеников</span><b>${tg(r.rev)}</b></div>
+        ${r.p.pay === 'lesson' ? '<div class="line"><span>Проведено уроков в ноябре</span><b>28</b></div>' : ''}
+        <div class="line tot"><span>Зарплата за ноябрь</span><b class="pos">${tg(r.pay)}</b></div>
+        ${ROLE === 'owner' ? `<div class="muted" style="margin-top:6px">Центру остаётся с его учеников: ${tg(r.rev - r.pay)}</div>` : ''}</div>`).join('')}`;
+  }
+
+  function money() {
+    const c = calc(), pay = c.rows.reduce((t, r) => t + r.pay, 0);
+    const profit = c.rev - pay - c.common;
+    V.innerHTML = `
+      <div class="tiles">
+        <div class="tile hl"><div class="l">${MODE === 'part' ? 'Делят партнёры' : 'Осталось хозяину'}</div><div class="v">${tg(profit)}</div><div class="n">за ноябрь</div></div>
+        <div class="tile"><div class="l">Учеников</div><div class="v">${S.length}</div><div class="n">${G.length} групп, 3 кабинета</div></div>
+      </div>
+      <div class="card"><h3>Ноябрь 2026</h3>
+        <div class="line"><span>Оплаты учеников</span><b>${tg(c.rev)}</b></div>
+        ${MODE === 'teach' ? `<div class="line"><span>Зарплата учителей</span><b class="neg">−${tg(pay)}</b></div>` : ''}
+        <div class="line"><span>Аренда кабинетов</span><b class="neg">−${tg(c.rent)}</b></div>
+        <div class="line"><span>Реклама</span><b class="neg">−${tg(c.ads)}</b></div>
+        <div class="line"><span>Связь, Kaspi, хозтовары</span><b class="neg">−${tg(c.other)}</b></div>
+        <div class="line"><span>Налог ИП (пример 3%)</span><b class="neg">−${tg(c.tax)}</b></div>
+        <div class="line tot"><span>${MODE === 'part' ? 'Прибыль центра (делится на троих)' : 'Прибыль центра'}</span><b class="pos">${tg(profit)}</b></div>
+      </div>
+      <div class="card"><h3>По группам</h3>${G.map(g => { const st = S.filter(s => s.g === g.id), r = st.reduce((t, s) => t + s.sum, 0); return `<div class="line"><span>${gname(g)} · ${st.length} уч.</span><b>${tg(r)}</b></div>`; }).join('')}</div>
+      <div class="card"><h3>Что подсказывает финансист</h3>
+        <div class="line"><span>💡 Кабинет 3 занят только индивидуальными уроками днём. Вечером там можно поставить ещё одну группу, аренда уже оплачена.</span></div>
+        <div class="line"><span>💡 Не оплатили ${S.filter(s => !s.paid).length} учеников на ${tg(S.filter(s => !s.paid).reduce((t, s) => t + s.sum, 0))}. Напоминание за 2 дня до конца абонемента обычно снимает половину долгов.</span></div>
+        <div class="line"><span>💡 ${MODE === 'part' ? 'Каждый видит свою долю, и в конце месяца не нужно сидеть со сверкой: сумма к переводу считается сама.' : 'Самая доходная группа для центра: IELTS. Можно открыть вторую.'}</span></div>
+      </div>
+      <a class="btn btn-teal" href="./">Хочу такой учёт</a>`;
+  }
+
+  function open(h) { document.getElementById('sheetBox').innerHTML = h; document.getElementById('sheet').classList.add('open'); document.querySelectorAll('[data-x]').forEach(b => b.onclick = close); }
+  function close() { document.getElementById('sheet').classList.remove('open'); }
+  document.getElementById('sheet').onclick = e => { if (e.target.id === 'sheet') close(); };
+  document.querySelectorAll('#mode button').forEach(b => b.onclick = () => { MODE = b.dataset.mode; ROLE = 'owner'; gf = 'all'; render(); toast(MODE === 'part' ? 'Трое партнёров, оплата на одно ИП: у каждого свои группы и своя доля' : 'Хозяин нанимает учителей на процент или за урок'); });
+  const R = { today, students, people, money };
+  function render() {
+    head();
+    document.querySelectorAll('.nav button').forEach(b => b.classList.toggle('on', b.dataset.t === tab));
+    R[tab]();
+  }
+  document.querySelectorAll('.nav button').forEach(b => b.onclick = () => { tab = b.dataset.t; render(); window.scrollTo(0, 0); });
+  render();
+})();
+</script>
+</body>
+</html>
