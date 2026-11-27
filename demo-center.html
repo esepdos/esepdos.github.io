@@ -52,6 +52,16 @@
   .tog button{border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:6px 10px;font:inherit;font-size:13px;cursor:pointer}
   .tog button.yes{background:var(--teal);border-color:var(--teal);color:#fff}
   .tog button.no{background:var(--redbg);border-color:var(--red);color:var(--red)}
+  .tog button.warn{background:var(--amberbg);border-color:var(--amber);color:var(--amber)}
+  .tog button{padding:6px 8px}
+  .cal{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+  .cd{border-radius:10px;padding:6px 2px;text-align:center;font-size:12px;border:1px solid var(--line);background:#fff}
+  .cd b{display:block;font-size:15px}
+  .cd.y{background:var(--tealbg);border-color:transparent;color:#11665c}
+  .cd.n{background:var(--redbg);border-color:transparent;color:var(--red)}
+  .cd.w{background:var(--amberbg);border-color:transparent;color:var(--amber)}
+  .cd.f{color:var(--hint);border-style:dashed}
+  .legend{display:flex;flex-wrap:wrap;gap:10px;font-size:12px;color:var(--hint);margin-top:8px}
   .search input{width:100%;font:inherit;font-size:15px;padding:11px 12px;border:1.5px solid var(--line);border-radius:12px;background:#fff;outline:none;margin-bottom:10px}
   .nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);padding:6px 0 calc(6px + env(safe-area-inset-bottom))}
   .nav .in{max-width:480px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
@@ -136,6 +146,21 @@
   });
 
   const TODAY = new Date(2026, 10, 27); // пятница
+  // история посещений за ноябрь: был (урок списан), пропустил без предупреждения (списан), предупредил заранее (не списан, абонемент продлевается)
+  S.forEach(s => {
+    const g = G.find(x => x.id === s.g);
+    s.days = g.kind === 'ind' ? [g.days[s.id % 5], g.days[(s.id + 2) % 5]] : g.days;
+    s.hist = [];
+    for (let day = 2; day < 27; day++) {
+      const d = new Date(2026, 10, day);
+      if (!s.days.includes(d.getDay())) continue;
+      const r = rnd();
+      s.hist.push({ d, st: r < 0.8 ? 'y' : r < 0.9 ? 'n' : 'w' });
+    }
+    const charged = s.hist.filter(h => h.st !== 'w').length;
+    s.lessons = Math.max(s.lessons, Math.min(charged + 2, 10));
+    if (s.paid) s.left = Math.max(0, s.lessons - charged);
+  });
   let MODE = 'teach', ROLE = 'owner', tab = 'today', dayOff = 0, gf = 'all', q = '';
   const ATT = {};   // отметки посещаемости в демо
   const V = document.getElementById('view');
@@ -179,7 +204,7 @@
         const n = S.filter(s => s.g === g.id).length;
         return `<div class="ls" data-g="${g.id}"><div class="tm">${g.t}<small>${g.room.replace('Кабинет ', 'каб. ')}</small></div>
           <div><div style="font-weight:600">${gname(g)}</div><div class="muted"><span class="dot" style="background:${p.color}"></span>${p.name} · ${n} уч.</div></div>
-          <div class="rt">${a ? `<span class="pill p-ok">Отмечено ${a.filter(Boolean).length}/${a.length}</span>` : '<span class="pill p-wait">Отметить</span>'}</div></div>`;
+          <div class="rt">${a ? `<span class="pill p-ok">Отмечено ${a.filter(v => v === 'y').length}/${a.length}</span>` : '<span class="pill p-wait">Отметить</span>'}</div></div>`;
       }).join('') || '<div class="muted">В этот день занятий нет</div>'}</div>
       <div class="card"><h3>💬 Учитель может отмечать и через бота</h3>
         <div class="bot me">Kids A1: не было Арсена и Камилы</div>
@@ -199,14 +224,18 @@
     const draw = () => {
       open(`<button class="close" data-x>×</button><h3>${gname(g)} · ${g.t}</h3><div class="muted">${d.getDate()} ${MON[d.getMonth()]} · ${g.room} · ${PP(who(g)).name}</div>
         <div class="card" style="margin-top:12px">${st.map((s, i) => { const [t, c] = status(s); return `<div class="att"><div class="ava" style="background:${s.color}">${s.name[0]}</div><div><div style="font-weight:600">${s.name}</div><span class="pill ${c}">${t}</span></div>
-          <div class="tog"><button class="${cur[i] === true ? 'yes' : ''}" data-i="${i}" data-v="1">Был</button><button class="${cur[i] === false ? 'no' : ''}" data-i="${i}" data-v="0">Нет</button></div></div>`; }).join('')}</div>
+          <div class="tog"><button class="${cur[i] === 'y' ? 'yes' : ''}" data-i="${i}" data-v="y">Был</button><button class="${cur[i] === 'n' ? 'no' : ''}" data-i="${i}" data-v="n">Нет</button><button class="${cur[i] === 'w' ? 'warn' : ''}" data-i="${i}" data-v="w" title="Предупредил заранее">Предупр.</button></div></div>`; }).join('')}</div>
         <button class="btn btn-teal" id="saveAtt">Сохранить посещаемость</button>
-        <div class="muted" style="margin-top:8px">При отметке «Был» с абонемента списывается урок. Когда остаётся 1, бот напоминает родителям об оплате.</div>`);
-      document.querySelectorAll('.tog button').forEach(b => b.onclick = () => { cur[+b.dataset.i] = b.dataset.v === '1'; draw(); });
+        <div class="muted" style="margin-top:8px">«Был» и «Нет» списывают урок с абонемента. «Предупр.» (предупредил заранее) не списывает: абонемент продлевается на этот урок. Когда остаётся 1, бот напоминает родителям об оплате.</div>`);
+      document.querySelectorAll('.tog button').forEach(b => b.onclick = () => { cur[+b.dataset.i] = b.dataset.v; draw(); });
       document.getElementById('saveAtt').onclick = () => {
-        const all = cur.map(v => v !== false);
-        if (!ATT[k]) st.forEach((s, i) => { if (all[i] && s.left > 0) s.left--; });
-        ATT[k] = all; close(); render(); toast('Посещаемость сохранена, уроки списаны (в демо не сохраняется)');
+        const all = cur.map(v => v || 'y');
+        st.forEach((s, i) => {
+          const old = s.hist.find(h => dkey(h.d) === dkey(d));
+          if (old) { if (old.st !== 'w' && s.paid) s.left++; old.st = all[i]; } else s.hist.push({ d: new Date(d), st: all[i] });
+          if (all[i] !== 'w' && s.paid && s.left > 0) s.left--;
+        });
+        ATT[k] = all; close(); render(); toast('Посещаемость сохранена (в демо не сохраняется)');
       };
     };
     draw();
@@ -228,6 +257,22 @@
     i.oninput = () => { q = i.value.trim().toLowerCase(); const p = i.selectionStart; students(); const n = document.getElementById('q'); n.focus(); n.setSelectionRange(p, p); };
     V.querySelectorAll('[data-s]').forEach(e => e.onclick = () => sCard(+e.dataset.s));
   }
+  function calendar(s) {
+    const h = s.hist.slice().sort((a, b) => a.d - b.d);
+    const y = h.filter(x => x.st === 'y').length, n = h.filter(x => x.st === 'n').length, w = h.filter(x => x.st === 'w').length;
+    const fut = [];
+    for (let k = 0; fut.length < 3 && k < 21; k++) { const d = new Date(TODAY); d.setDate(d.getDate() + k); if (s.days.includes(d.getDay()) && !h.some(x => dkey(x.d) === dkey(d))) fut.push(d); }
+    const ic = { y: '✓', n: '✗', w: '↷' };
+    const dd = d => String(d.getDate()).padStart(2, '0') + '.' + String(d.getMonth() + 1).padStart(2, '0');
+    return `<div class="card"><h3>Посещения в ноябре</h3>
+      <div class="cal">${h.map(x => `<div class="cd ${x.st}"><b>${ic[x.st]}</b>${dd(x.d)}</div>`).join('')}${fut.map(d => `<div class="cd f"><b>·</b>${dd(d)}</div>`).join('')}</div>
+      <div class="legend"><span>✓ был</span><span>✗ пропустил, урок списан</span><span>↷ предупредил, не списан</span><span>· впереди</span></div>
+      <div class="line" style="margin-top:8px"><span>Был на занятиях</span><b>${y}</b></div>
+      <div class="line"><span>Пропустил без предупреждения (списано)</span><b class="${n ? 'neg' : ''}">${n}</b></div>
+      <div class="line"><span>Предупредил заранее (не списано)</span><b>${w}</b></div>
+      ${w && s.paid ? `<div class="muted" style="margin-top:6px">Абонемент продлён на ${w} ${w === 1 ? 'урок' : 'урока'}: предупреждённые пропуски не сгорают.</div>` : ''}
+    </div>`;
+  }
   function sCard(id) {
     const s = S.find(x => x.id === id), g = G.find(x => x.id === s.g), [t, c] = status(s);
     open(`<button class="close" data-x>×</button><h3>${s.name}</h3><div class="muted">${gname(g)} · ${PP(who(g)).name}${s.parent ? ' · ' + s.parent : ''}</div>
@@ -236,6 +281,7 @@
         <div class="line"><span>Оплата</span><b>${s.paid ? 'оплачено, ' + s.pay : '<span class="neg">не оплачено</span>'}</b></div>
         <div class="line"><span>Статус</span><b><span class="pill ${c}">${t}</span></b></div>
       </div>
+      ${calendar(s)}
       ${!s.paid ? '<button class="btn btn-teal" id="pay">Отметить оплату</button>' : ''}
       <button class="btn btn-ghost" id="rem">${s.paid ? 'Напомнить о продлении' : 'Напомнить об оплате'}</button>`);
     const p = document.getElementById('pay'); if (p) p.onclick = () => { s.paid = true; s.pay = 'Kaspi'; s.left = s.lessons; close(); render(); toast('Оплата отмечена (в демо не сохраняется)'); };
