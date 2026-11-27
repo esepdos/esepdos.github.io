@@ -265,6 +265,7 @@
       { id: '4', title: 'Пилинг миндальный 30%', unit: 'pc', stock: 2, min: 2, buy: 12500 },
       { id: '5', title: 'Солнцезащитный крем SPF 50', unit: 'pc', stock: 8, min: 4, buy: 7600 }], synced: ru(now) }),
     reports: () => D.rep,
+    questionAnswer: () => ({ ok: true }),
     personal: () => (MODE === 'self' ? D.persSelf : D.persBiz),
     today: () => ({ today: iso(now), tomorrow: iso(day(1)), unconfirmed: SHOP ? [
         { time: 'до 12:00', client: 'Заказ Kaspi 540127', phone: '', staff: 'Айгерим', services: 'Комбинезон зимний 104 см' },
@@ -273,6 +274,10 @@
         { time: '10:00', client: 'Асель', phone: '', staff: 'Старший мастер', services: 'Чистка лица' },
         { time: '13:30', client: 'Жанна', phone: '', staff: 'Собственник', services: 'Ботулинотерапия' },
         { time: '17:00', client: 'Дина', phone: '', staff: 'Мастер', services: 'Пилинг' }],
+      questions: ROLE === 'admin' ? [] : [
+        { id: 'q1', kind: 'Операция', date: ru(day(-3)), sum: 184000, who: 'ИП Сейткали', from: 'Перевод с личной карты собственника', text: 'Это расход бизнеса или личное?', opts: ['Бизнес: расход', 'Личное', 'Зарплата', 'Закуп товара', 'Другое'], answer: '', comment: '', photo: false, by: '', at: '' },
+        { id: 'q2', kind: 'Операция', date: ru(day(-6)), sum: 45000, who: 'Наличные из кассы', from: 'Расход без чека', text: 'На что потратили?', opts: ['Бизнес: расход', 'Личное', 'Зарплата', 'Закуп товара', 'Другое'], answer: '', comment: '', photo: false, by: '', at: '' },
+        { id: 'q3', kind: 'Общий', date: '', sum: 0, who: '', from: '', text: 'Аренда 450 000 в месяц: коммунальные платежи входят или платите отдельно?', opts: [], answer: '', comment: '', photo: false, by: '', at: '' }],
       tasks: ROLE === 'admin' ? TASKS.filter(t => t.to === (SHOP ? 'Продавец' : 'Администратор')) : TASKS, people: [SHOP ? 'Продавец' : 'Администратор', 'Собственник', 'Финансист'], goods: { sum: SHOP ? 1180000 : 145000 }, days, staff: D.rep.staff, tabel: [],
       mine: ROLE !== 'admin' ? undefined : SHOP
         ? { name: 'Айгерим', role: 'Продавец', own: Math.round(days.reduce((a, x) => a + x.staff['Айгерим'].sum, 0) * 0.02), pct: 2, salary: 200000, target: 0, centerPct: 0, bonus: 0, off: 'пн', tabelDays: null }
@@ -1936,6 +1941,7 @@ function drawHome(s) {
     <div class="muted" style="margin:-6px 2px 10px">${esc(ME.client.name)} · ${now.getDate()} ${MONTHS_GEN[now.getMonth()]}, ${WDS_FULL[now.getDay()]}</div>`;
   if (A) {
     $app.innerHTML = head + `
+      <div id="tdQ">${TODAY ? qHtml(TODAY) : ''}</div>
       <div id="tdMain">${REP ? mainCardHtml(REP) : ''}</div>
       <div id="tdPay">${REP ? payCardHtml(REP) : ''}</div>
       <div id="tdWage"></div>
@@ -1951,6 +1957,7 @@ function drawHome(s) {
     wageCard();
   } else {
     $app.innerHTML = head + `
+      <div id="tdQ">${TODAY ? qHtml(TODAY) : ''}</div>
       <div class="grid2">
         <button class="btn" data-up style="padding:16px 8px">📷 Загрузить чек</button>
         <button class="btn sec" data-man style="padding:16px 8px">✍️ Расход без чека</button>
@@ -1982,6 +1989,7 @@ function drawHome(s) {
   bindToggles(() => drawHome(s));
   bindAttn();
   bindTasks();
+  bindQ();
   fillCash();
   const sheet = document.getElementById('sheet');
   if (sheet) sheet.onclick = () => tg ? tg.openLink(ME.sheetUrl) : window.open(ME.sheetUrl);
@@ -1989,6 +1997,70 @@ function drawHome(s) {
 }
 const MONTHS_GEN = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
 const WDS_FULL = ['воскресенье', 'понедельник', 'вторник', 'среда', 'четверг', 'пятница', 'суббота'];
+
+// «Вопросы от Арайлым»: по операциям (дата, кому, сумма) и общие. Ответ кнопкой, комментарий и фото по желанию.
+// Отвеченные свёрнуты в «Отвечено (N)», их можно изменить. Лист «Вопросы» в таблице клиента.
+let QOPEN = false, QEDIT = null;
+const QSEL = {}, QPHOTO = {}, QCOM = {};
+function qAnswered(q) { return !!(q.answer || q.comment); }
+function qHtml(t) {
+  const L = (t && t.questions) || [];
+  if (!L.length) return '';
+  const open = L.filter(q => !qAnswered(q) || QEDIT === q.id), done = L.filter(q => qAnswered(q) && QEDIT !== q.id);
+  const head = q => `${q.date || q.who || q.sum ? `<div class="row" style="align-items:baseline"><b>${esc([q.date, q.who].filter(Boolean).join(', '))}</b>${q.sum ? `<b style="white-space:nowrap">${tg0(q.sum)}</b>` : ''}</div>` : ''}
+    ${q.from ? `<div class="muted" style="font-size:12px">${esc(q.from)}</div>` : ''}
+    <div style="margin-top:4px">${esc(q.text)}</div>${ME.user.admin && q.to ? `<div class="muted" style="font-size:12px">кому: ${esc(q.to)}</div>` : ''}`;
+  const card = q => {
+    const sel = QSEL[q.id] !== undefined ? QSEL[q.id] : q.answer;
+    return `<div style="border-top:1px solid var(--line);padding:10px 0" data-q="${esc(q.id)}">${head(q)}
+      ${q.opts.length ? `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px">${q.opts.map(o => `<button class="chip ${sel === o ? 'on' : ''}" data-qopt="${esc(o)}">${esc(o)}</button>`).join('')}</div>` : ''}
+      <input data-qcom placeholder="${q.opts.length ? 'комментарий, если нужно' : 'ваш ответ'}" value="${esc(QCOM[q.id] !== undefined ? QCOM[q.id] : q.comment)}" style="margin-top:8px">
+      <div style="display:flex;gap:6px;margin-top:6px;align-items:center">
+        <label class="chip" style="cursor:pointer">📎 ${QPHOTO[q.id] ? 'фото выбрано' : q.photo ? 'фото есть, заменить' : 'фото или скрин'}<input type="file" accept="image/*" data-qph style="display:none"></label>
+        <span style="flex:1"></span><button class="btn" data-qsend style="width:auto;padding:8px 16px">Ответить</button></div></div>`;
+  };
+  const row = q => `<div style="border-top:1px solid var(--line);padding:8px 0" data-q="${esc(q.id)}">
+    <div class="row"><span>${esc([q.date, q.who].filter(Boolean).join(', ') || q.text.slice(0, 60))}${q.sum ? ' · ' + tg0(q.sum) : ''}</span><button class="chip" data-qedit>изменить</button></div>
+    <div class="muted">✓ ${esc([q.answer, q.comment].filter(Boolean).join(': '))}${q.photo ? ' · 📎' : ''}${q.by ? ' · ' + esc(q.by) + ' ' + esc(q.at) : ''}</div></div>`;
+  const doneBlock = done.length ? `<div style="border-top:1px solid var(--line);padding:8px 0;cursor:pointer" data-qopen class="row"><span class="muted">${QOPEN ? '▾' : '▸'} Отвечено (${done.length})</span><span class="muted" style="font-size:12px">${QOPEN ? 'свернуть' : 'показать'}</span></div>${QOPEN ? done.map(row).join('') : ''}` : '';
+  return `<h2>❓ Вопросы от Арайлым${open.length ? ` <span class="muted" style="font-weight:400">${open.length}</span>` : ''}</h2><div class="card">
+    ${open.length ? `<div class="muted" style="margin-bottom:2px">Что это за операции? Нажмите подходящий ответ, комментарий и фото по желанию.</div>${open.map(card).join('')}` : '<div class="under">На все вопросы ответили ✓</div>'}${doneBlock}</div>`;
+}
+function bindQ() {
+  const box = document.getElementById('tdQ');
+  if (!box) return;
+  const rd = () => {
+    box.innerHTML = qHtml(TODAY); bindQ();
+    const at = document.getElementById('tdAttn'); if (at && LASTSUM && ME.user.approver) { at.innerHTML = attnHtml(LASTSUM, TODAY); bindAttn(); }
+  };
+  box.querySelectorAll('[data-qopen]').forEach(b => b.onclick = () => { QOPEN = !QOPEN; rd(); });
+  box.querySelectorAll('[data-qedit]').forEach(b => b.onclick = () => { QEDIT = b.closest('[data-q]').dataset.q; rd(); });
+  box.querySelectorAll('[data-qopt]').forEach(b => b.onclick = () => {
+    const id = b.closest('[data-q]').dataset.q, com = b.closest('[data-q]').querySelector('[data-qcom]');
+    if (com) QCOM[id] = com.value;
+    const q = TODAY.questions.find(x => x.id === id);
+    QSEL[id] = (QSEL[id] !== undefined ? QSEL[id] : q.answer) === b.dataset.qopt ? '' : b.dataset.qopt; rd();
+  });
+  box.querySelectorAll('[data-qph]').forEach(inp => inp.onchange = async () => {
+    const id = inp.closest('[data-q]').dataset.q, f = inp.files && inp.files[0]; if (!f) return;
+    const com = inp.closest('[data-q]').querySelector('[data-qcom]'); if (com) QCOM[id] = com.value;
+    try { QPHOTO[id] = await prepareFile(f); rd(); } catch (e) { toast(e.message); }
+  });
+  box.querySelectorAll('[data-qsend]').forEach(b => b.onclick = async () => {
+    const el = b.closest('[data-q]'), id = el.dataset.q, q = TODAY.questions.find(x => x.id === id);
+    const answer = QSEL[id] !== undefined ? QSEL[id] : q.answer, comment = el.querySelector('[data-qcom]').value.trim();
+    if (q.opts.length && !answer && !comment && !QPHOTO[id]) return toast('Нажмите ответ или напишите комментарий');
+    if (!q.opts.length && !comment && !QPHOTO[id]) return toast('Напишите ответ');
+    b.disabled = true; b.textContent = 'Сохраняю…';
+    const old = { answer: q.answer, comment: q.comment, by: q.by, at: q.at, photo: q.photo };
+    try {
+      const r = await api('questionAnswer', { id, answer, comment, photo: QPHOTO[id] || null });
+      Object.assign(q, { answer, comment, by: ME.user.name, at: new Date().toLocaleDateString('ru-RU'), photo: !!(r && r.photo) || q.photo });
+      delete QSEL[id]; delete QPHOTO[id]; delete QCOM[id]; if (QEDIT === id) QEDIT = null;
+      haptic('success'); cput(ckey('today', {}), TODAY); rd();
+    } catch (e) { Object.assign(q, old); toast('Не сохранилось: ' + e.message); b.disabled = false; b.textContent = 'Ответить'; }
+  });
+}
 
 // Что требует внимания (проверяющим): только то, где есть что делать
 let UNC_OPEN = false;
@@ -2013,6 +2085,8 @@ function attnHtml(s, t) {
   if (unc.length) items.push(['📞 Не подтвердили запись на завтра', unc.length, 'unc']);
   const open = t && t.tasks ? t.tasks.filter(x => !x.done).length : 0;
   if (open) items.push(['📝 Задачи не выполнены', open, 'tasks']);
+  const qn = t && t.questions ? t.questions.filter(x => !qAnswered(x)).length : 0;
+  if (qn) items.push(['❓ Вопросы без ответа', qn, 'q']);
   if (!items.length) return t ? '<div class="under">Всё в порядке ✓</div>' : '<div class="muted">Проверяю…</div>';
   return items.map(([title, n, go]) => `<div class="kv doc" data-attn="${go}" style="padding:8px 0"><span>${esc(title)}</span><b>${n}${n === '' ? '' : ' ›'}</b></div>`
     + (go === 'unc' && UNC_OPEN ? uncHtml(unc) : '')).join('');
@@ -2078,6 +2152,7 @@ function bindAttn() {
     else if (g === 'err') { DOCFILTER = 'Ошибка распознавания'; go('docs'); }
     else if (g === 'buy') go('buy');
     else if (g === 'personal') go('personal');
+    else if (g === 'q') { const el = document.getElementById('tdQ'); if (el) el.scrollIntoView({ behavior: 'smooth' }); }
     else if (g === 'tasks') { const el = document.getElementById('tdTasks'); if (el) el.scrollIntoView({ behavior: 'smooth' }); }
     else if (g === 'unc') { UNC_OPEN = !UNC_OPEN; const el = document.getElementById('tdAttn'); if (el && TODAY) { el.innerHTML = attnHtml(LASTSUM, TODAY); bindAttn(); } }
   });
@@ -2140,6 +2215,8 @@ async function fillToday(s) {
   const put = t => {
     if (!t || TAB !== 'home' || CUR) return;
     TODAY = t;
+    const qq = document.getElementById('tdQ');
+    if (qq && !qq.contains(document.activeElement)) { qq.innerHTML = qHtml(t); bindQ(); }
     const now = new Date(), m = monthNow();
     if (ME.user.approver) {
       const alt = document.getElementById('tdAlt');
