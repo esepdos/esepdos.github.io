@@ -107,7 +107,7 @@
   const pick = a => a[Math.floor(rnd() * a.length)];
 
   const MASTERS = [
-    { id: 'own', name: 'Вы (хозяйка)', short: 'Вы', color: '#1f9e90', pct: 0 },
+    { id: 'own', name: 'Вы (собственник)', short: 'Вы', color: '#1f9e90', pct: 0 },
     { id: 'asel', name: 'Асель', short: 'Асель', color: '#8a5cc4', pct: 0.4 },
     { id: 'dana', name: 'Дана', short: 'Дана', color: '#c4703b', pct: 0.4 },
   ];
@@ -168,8 +168,8 @@
 
   function roles() {
     document.getElementById('roles').innerHTML = '<span class="muted" style="align-self:center;flex:none">Смотрю как:</span>' +
-      MASTERS.map(m => `<button class="chip ${ROLE === m.id ? 'on' : ''}" data-r="${m.id}">${m.id === 'own' ? 'Хозяйка' : 'Мастер ' + m.name}</button>`).join('');
-    document.querySelectorAll('[data-r]').forEach(b => b.onclick = () => { ROLE = b.dataset.r; mf = 'all'; if (ROLE !== 'own' && (tab === 'money' || tab === 'stock')) tab = 'today'; render(); toast(ROLE === 'own' ? 'Хозяйка видит всё: записи всех мастеров, деньги, остатки' : 'Мастер видит только свои записи и своих клиентов'); });
+      MASTERS.map(m => `<button class="chip ${ROLE === m.id ? 'on' : ''}" data-r="${m.id}">${m.id === 'own' ? 'Собственник' : 'Мастер ' + m.name}</button>`).join('');
+    document.querySelectorAll('[data-r]').forEach(b => b.onclick = () => { ROLE = b.dataset.r; mf = 'all'; if (ROLE !== 'own' && (tab === 'money' || tab === 'stock')) tab = 'today'; render(); toast(ROLE === 'own' ? 'Собственник видит всё: записи всех мастеров, деньги, остатки' : 'Мастер видит только свои записи и своих клиентов'); });
     document.querySelectorAll('[data-owner]').forEach(b => b.classList.toggle('hide', ROLE !== 'own'));
   }
 
