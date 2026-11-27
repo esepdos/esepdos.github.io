@@ -135,7 +135,7 @@
       const m = MASTERS[k % 3 === 0 ? 0 : (rnd() < 0.5 ? 1 : 2)];
       let t = pick(slots); let g = 0; while (used[m.id + t] && g++ < 8) t = pick(slots); used[m.id + t] = 1;
       const s = rnd() < 0.35 ? SERV[4] : rnd() < 0.08 ? SERV[5] : pick(SERV.slice(0, 4));
-      const c = pick(CL);
+      let c = pick(CL); let h = 0; while (used['c' + c.id] && h++ < 10) c = pick(CL); used['c' + c.id] = 1;
       const past = d < TODAY;
       const isToday = dkey(d) === dkey(TODAY);
       let st = past ? (rnd() < 0.06 ? 'noshow' : 'done') : 'wait';
