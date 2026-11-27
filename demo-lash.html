@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>«Демо-студия» (записи и учёт студии ресниц): EsepDos</title>
+<link rel="icon" type="image/svg+xml" href="logo.svg">
+<link rel="icon" type="image/png" href="favicon.png">
+<meta name="description" content="Пример журнала записей и учёта студии: записи мастеров, база клиентов, выручка, проценты мастерам, остатки материалов.">
+<style>
+  :root{--teal:#1f9e90;--tealbg:#e8f6f4;--gold:#f4c542;--ink:#12161c;--hint:#5b6470;--line:#e4e7eb;--bg:#f6f7f9;--card:#fff;--red:#d64545;--redbg:#fdecec;--amber:#b7791f;--amberbg:#fdf4e3}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--ink);background:var(--bg);line-height:1.45;-webkit-font-smoothing:antialiased}
+  .app{max-width:480px;margin:0 auto;min-height:100vh;padding-bottom:84px}
+  .top{position:sticky;top:0;z-index:5;background:rgba(246,247,249,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:10px 16px}
+  .top .row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .back{font-size:14px;color:var(--teal);text-decoration:none;font-weight:600}
+  .badge{font-size:11px;font-weight:700;color:var(--amber);background:var(--amberbg);padding:3px 8px;border-radius:999px}
+  .ttl{font-size:19px;font-weight:700;margin-top:6px}
+  .role{display:flex;gap:6px;margin-top:8px;overflow-x:auto;scrollbar-width:none}
+  main{padding:14px 16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px}
+  .tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+  .tile{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px}
+  .tile .l{font-size:12px;color:var(--hint)}
+  .tile .v{font-size:20px;font-weight:700;margin-top:2px}
+  .tile .n{font-size:12px;color:var(--hint);margin-top:2px}
+  .tile.hl{background:var(--tealbg);border-color:transparent}
+  .tile.hl .v{color:#11665c}
+  h3{font-size:16px;margin:4px 0 10px}
+  .muted{color:var(--hint);font-size:13px}
+  .line{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid var(--line);font-size:14px}
+  .line:first-of-type{border-top:0}
+  .line b{white-space:nowrap}
+  .line.tot{font-weight:700;border-top:2px solid var(--ink)}
+  .neg{color:var(--red)} .pos{color:#11665c}
+  .chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:10px;scrollbar-width:none}
+  .chip{flex:none;font-size:13px;padding:6px 11px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer;font-family:inherit}
+  .chip.on{background:var(--teal);border-color:var(--teal);color:#fff}
+  .ap{display:flex;gap:10px;padding:10px 0;border-top:1px solid var(--line);cursor:pointer;align-items:flex-start}
+  .ap:first-child{border-top:0}
+  .tm{width:52px;flex:none;font-weight:700;font-size:15px}
+  .tm small{display:block;font-weight:400;color:var(--hint);font-size:11px}
+  .ap .who{font-weight:600}
+  .ap .sv{font-size:13px;color:var(--hint)}
+  .ap .rt{margin-left:auto;text-align:right;font-size:13px;white-space:nowrap}
+  .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:middle}
+  .pill{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px}
+  .p-ok{background:var(--tealbg);color:#11665c} .p-wait{background:#eef2f7;color:#475569} .p-warn{background:var(--amberbg);color:var(--amber)} .p-no{background:var(--redbg);color:var(--red)}
+  .day{font-size:13px;font-weight:700;color:var(--hint);margin:14px 0 4px;text-transform:uppercase;letter-spacing:.03em}
+  .cl{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line);cursor:pointer}
+  .cl:first-child{border-top:0}
+  .ava{width:38px;height:38px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff}
+  .search input,.form input,.form select{width:100%;font:inherit;font-size:15px;padding:11px 12px;border:1.5px solid var(--line);border-radius:12px;background:#fff;outline:none}
+  .search{margin-bottom:10px}
+  .form label{display:block;font-size:13px;color:var(--hint);margin:10px 0 4px}
+  .bar{height:8px;background:var(--line);border-radius:99px;overflow:hidden;margin:6px 0 2px}
+  .bar i{display:block;height:100%;background:var(--teal)}
+  .bar i.low{background:var(--red)}
+  .nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);padding:6px 0 calc(6px + env(safe-area-inset-bottom))}
+  .nav .in{max-width:480px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
+  .nav button{border:0;background:none;font-family:inherit;font-size:11px;color:var(--hint);padding:4px 0;cursor:pointer}
+  .nav button span{display:block;font-size:21px;line-height:1.2}
+  .nav button.on{color:var(--teal);font-weight:700}
+  .nav button.hide{display:none}
+  .sheet{position:fixed;inset:0;background:rgba(18,22,28,.45);display:none;align-items:flex-end;justify-content:center;z-index:20}
+  .sheet.open{display:flex}
+  .sheet .box{background:var(--bg);width:100%;max-width:480px;max-height:88vh;overflow:auto;border-radius:20px 20px 0 0;padding:16px}
+  .close{float:right;border:0;background:#fff;border-radius:999px;width:32px;height:32px;font-size:18px;cursor:pointer}
+  .btn{display:block;width:100%;text-align:center;font:inherit;font-weight:700;font-size:15px;padding:13px;border-radius:12px;border:0;cursor:pointer;margin-top:8px;text-decoration:none}
+  .btn-teal{background:var(--teal);color:#fff}
+  .btn-ghost{background:#fff;color:var(--teal);border:1.5px solid var(--teal)}
+  .fab{position:fixed;right:max(16px,calc(50% - 224px));bottom:84px;width:54px;height:54px;border-radius:50%;border:0;background:var(--teal);color:#fff;font-size:28px;box-shadow:0 6px 18px rgba(31,158,144,.4);cursor:pointer;z-index:6}
+  .note{background:var(--tealbg);color:#1d4a45;border-radius:12px;padding:10px 12px;font-size:13px;margin-bottom:12px}
+  .bot{background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 12px;font-size:14px;margin-top:8px}
+  .bot.me{background:#e7f6e7;margin-left:40px} .bot.it{margin-right:30px}
+  .toast{position:fixed;left:50%;bottom:150px;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:14px;padding:10px 14px;border-radius:12px;opacity:0;transition:.25s;pointer-events:none;z-index:30;max-width:90%}
+  .toast.on{opacity:1}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top">
+    <div class="row"><a class="back" href="./">‹ О сервисе и цены</a><span class="badge">ДЕМО · данные вымышленные</span></div>
+    <div class="ttl">Студия ресниц «Взгляд»</div>
+    <div class="role" id="roles"></div>
+  </div>
+  <main id="view"></main>
+</div>
+<button class="fab" id="fab" title="Новая запись">+</button>
+<nav class="nav"><div class="in">
+  <button data-t="today" class="on"><span>📅</span>Записи</button>
+  <button data-t="clients"><span>👩</span>Клиенты</button>
+  <button data-t="money" data-owner="1"><span>💰</span>Деньги</button>
+  <button data-t="stock" data-owner="1"><span>📦</span>Остатки</button>
+</div></nav>
+<div class="sheet" id="sheet"><div class="box" id="sheetBox"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+// Демо журнала записей студии: всё считается в браузере, данные вымышленные, ничего не сохраняется.
+(function () {
+  const fmt = n => Math.round(n).toLocaleString('ru-RU').replace(/,/g, ' ');
+  const tg = n => fmt(n) + ' ₸';
+  let seed = 11;
+  const rnd = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
+  const pick = a => a[Math.floor(rnd() * a.length)];
+
+  const MASTERS = [
+    { id: 'own', name: 'Вы (хозяйка)', short: 'Вы', color: '#1f9e90', pct: 0 },
+    { id: 'asel', name: 'Асель', short: 'Асель', color: '#8a5cc4', pct: 0.4 },
+    { id: 'dana', name: 'Дана', short: 'Дана', color: '#c4703b', pct: 0.4 },
+  ];
+  const SERV = [
+    { n: 'Классика', p: 10000, mat: 900 }, { n: '2D', p: 12000, mat: 1200 }, { n: '3D', p: 14000, mat: 1500 },
+    { n: 'Мокрый эффект', p: 13000, mat: 1300 }, { n: 'Коррекция', p: 8000, mat: 700 }, { n: 'Снятие', p: 2000, mat: 150 },
+  ];
+  const NAMES = ['Алия', 'Камила', 'Айым', 'Диана', 'Сабина', 'Асем', 'Мадина', 'Жанар', 'Карина', 'Томирис', 'Аружан', 'Ольга', 'Индира', 'Лаура', 'Айгуль', 'Дарина', 'Эльмира', 'Гульназ', 'Салтанат', 'Ника', 'Анара', 'Зарина', 'Виктория', 'Динара', 'Айдана', 'Меруерт', 'Наргиз', 'Әсел', 'Жания', 'Самал'];
+  const LAST = ['К.', 'С.', 'Б.', 'А.', 'Т.', 'Н.', 'М.', 'Ж.', 'Е.', 'Р.'];
+  const COL = ['#3b82c4', '#c43b6e', '#5a9e3b', '#b7791f', '#8a5cc4', '#1f9e90', '#c4703b'];
+  const CL = NAMES.map((n, i) => ({ id: i + 1, name: n + ' ' + LAST[i % LAST.length], phone: '+7 700 000 ' + String(40 + i).padStart(2, '0') + ' ' + String(10 + i * 3).padStart(2, '0'), color: COL[i % COL.length], src: pick(['Instagram', 'Instagram', 'Реклама', 'Рекомендация', '2ГИС']) }));
+
+  // записи: ноябрь 2026, сегодня пятница 27.11
+  const TODAY = new Date(2026, 10, 27);
+  const dkey = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  const AP = [];
+  let aid = 1;
+  for (let day = 1; day <= 30; day++) {
+    const d = new Date(2026, 10, day);
+    if (d.getDay() === 1 && day % 2) continue;    // иногда выходной в понедельник
+    const n = 2 + Math.floor(rnd() * 2) + (rnd() < 0.25 ? 1 : 0);
+    const slots = ['10:00', '12:30', '15:00', '17:30', '19:30'];
+    const used = {};
+    for (let k = 0; k < n; k++) {
+      const m = MASTERS[k % 3 === 0 ? 0 : (rnd() < 0.5 ? 1 : 2)];
+      let t = pick(slots); let g = 0; while (used[m.id + t] && g++ < 8) t = pick(slots); used[m.id + t] = 1;
+      const s = rnd() < 0.35 ? SERV[4] : rnd() < 0.08 ? SERV[5] : pick(SERV.slice(0, 4));
+      const c = pick(CL);
+      const past = d < TODAY;
+      const isToday = dkey(d) === dkey(TODAY);
+      let st = past ? (rnd() < 0.06 ? 'noshow' : 'done') : 'wait';
+      if (isToday && (t === '10:00' || t === '12:30')) st = 'done';
+      AP.push({ id: aid++, date: dkey(d), d, t, m: m.id, c: c.id, s: s.n, price: s.p, mat: s.mat, st, pay: st === 'done' ? pick(['Kaspi', 'Kaspi', 'Kaspi', 'Наличные']) : '' });
+    }
+  }
+  AP.sort((a, b) => a.date.localeCompare(b.date) || a.t.localeCompare(b.t));
+
+  const STOCK = [
+    { n: 'Ресницы 0.07 C, микс', q: 3, min: 4, unit: 'палетки', cost: 4500 },
+    { n: 'Ресницы 0.10 D', q: 6, min: 3, unit: 'палетки', cost: 4200 },
+    { n: 'Клей (5 мл)', q: 2, min: 2, unit: 'шт', cost: 7900 },
+    { n: 'Патчи гелевые', q: 140, min: 60, unit: 'пар', cost: 60 },
+    { n: 'Обезжириватель', q: 1, min: 2, unit: 'шт', cost: 2500 },
+    { n: 'Ремувер (крем)', q: 3, min: 1, unit: 'шт', cost: 3200 },
+    { n: 'Микробраши', q: 220, min: 100, unit: 'шт', cost: 12 },
+  ];
+
+  let ROLE = 'own', tab = 'today', mf = 'all', dayOff = 0, q = '';
+  const V = document.getElementById('view');
+  const M = id => MASTERS.find(m => m.id === id);
+  const C = id => CL.find(c => c.id === id);
+  const toast = t => { const e = document.getElementById('toast'); e.textContent = t; e.classList.add('on'); setTimeout(() => e.classList.remove('on'), 2300); };
+  const DAYS = ['вс', 'пн', 'вт', 'ср', 'чт', 'пт', 'сб'];
+  const MON = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
+  const dname = d => d.getDate() + ' ' + MON[d.getMonth()] + ', ' + DAYS[d.getDay()];
+  const stPill = a => a.st === 'done' ? `<span class="pill p-ok">Оплачено · ${a.pay}</span>` : a.st === 'noshow' ? '<span class="pill p-no">Не пришла</span>' : '<span class="pill p-wait">Ждём</span>';
+  const mine = a => ROLE === 'own' || a.m === ROLE;
+
+  function roles() {
+    document.getElementById('roles').innerHTML = '<span class="muted" style="align-self:center;flex:none">Смотрю как:</span>' +
+      MASTERS.map(m => `<button class="chip ${ROLE === m.id ? 'on' : ''}" data-r="${m.id}">${m.id === 'own' ? 'Хозяйка' : 'Мастер ' + m.name}</button>`).join('');
+    document.querySelectorAll('[data-r]').forEach(b => b.onclick = () => { ROLE = b.dataset.r; mf = 'all'; if (ROLE !== 'own' && (tab === 'money' || tab === 'stock')) tab = 'today'; render(); toast(ROLE === 'own' ? 'Хозяйка видит всё: записи всех мастеров, деньги, остатки' : 'Мастер видит только свои записи и своих клиентов'); });
+    document.querySelectorAll('[data-owner]').forEach(b => b.classList.toggle('hide', ROLE !== 'own'));
+  }
+
+  function apRow(a) {
+    const c = C(a.c), m = M(a.m);
+    return `<div class="ap" data-a="${a.id}"><div class="tm">${a.t}</div>
+      <div><div class="who">${c.name}</div><div class="sv">${a.s} · <span class="dot" style="background:${m.color}"></span>${m.short}</div></div>
+      <div class="rt">${stPill(a)}<div class="sv" style="margin-top:3px">${tg(a.price)}</div></div></div>`;
+  }
+
+  function today() {
+    const d = new Date(TODAY); d.setDate(d.getDate() + dayOff);
+    const list = AP.filter(a => a.date === dkey(d) && mine(a) && (mf === 'all' || a.m === mf));
+    const week = AP.filter(a => a.d >= new Date(2026, 10, 23) && a.d <= new Date(2026, 10, 29) && mine(a));
+    const doneSum = list.filter(a => a.st === 'done').reduce((t, a) => t + a.price, 0);
+    V.innerHTML = `
+      ${ROLE === 'own' && dayOff === 0 ? '<div class="note">Так выглядит журнал записей студии в приложении EsepDos. Переключите вверху «Мастер Асель»: мастер видит только свои записи. Нажмите на запись или «+».</div>' : ''}
+      <div class="chips">
+        <button class="chip" id="prev">‹</button>
+        <button class="chip on" style="min-width:170px">${dayOff === 0 ? 'Сегодня, ' : ''}${dname(d)}</button>
+        <button class="chip" id="next">›</button>
+      </div>
+      ${ROLE === 'own' ? `<div class="chips">${[['all', 'Все мастера'], ...MASTERS.map(m => [m.id, m.short])].map(([k, n]) => `<button class="chip ${mf === k ? 'on' : ''}" data-m="${k}">${n}</button>`).join('')}</div>` : ''}
+      <div class="tiles">
+        <div class="tile"><div class="l">Записей в этот день</div><div class="v">${list.length}</div><div class="n">${list.filter(a => a.st === 'wait').length} ещё впереди</div></div>
+        <div class="tile hl"><div class="l">Оплачено за день</div><div class="v">${tg(doneSum)}</div><div class="n">за неделю ${week.length} записей</div></div>
+      </div>
+      <div class="card">${list.map(apRow).join('') || '<div class="muted">Записей нет. Нажмите «+», чтобы записать клиента.</div>'}</div>
+      <div class="card"><h3>💬 Мастер может записывать и через бота</h3>
+        <div class="bot me">Записала Алию К. на завтра 15:00, 2D</div>
+        <div class="bot it">✅ Записал: Алия К., суббота 28.11, 15:00, 2D, 12 000 ₸, мастер Асель. Алия была у вас 3 раза, последний раз 24 октября.</div>
+        <div class="bot me">Алия пришла, оплатила каспи</div>
+        <div class="bot it">✅ Оплата 12 000 ₸ (Kaspi). Асель: 4 800 ₸ (40%). Списал материалы: ресницы, клей, патчи.</div>
+      </div>`;
+    document.getElementById('prev').onclick = () => { dayOff--; today(); };
+    document.getElementById('next').onclick = () => { dayOff++; today(); };
+    V.querySelectorAll('[data-m]').forEach(b => b.onclick = () => { mf = b.dataset.m; today(); });
+    V.querySelectorAll('[data-a]').forEach(e => e.onclick = () => apCard(+e.dataset.a));
+  }
+
+  function apCard(id) {
+    const a = AP.find(x => x.id === id), c = C(a.c), m = M(a.m);
+    const visits = AP.filter(x => x.c === a.c && x.st === 'done');
+    open(`<button class="close" data-x>×</button><h3>${a.t} · ${c.name}</h3><div class="muted">${dname(a.d)}</div>
+      <div class="card" style="margin-top:12px">
+        <div class="line"><span>Услуга</span><b>${a.s}</b></div>
+        <div class="line"><span>Мастер</span><b><span class="dot" style="background:${m.color}"></span>${m.name}</b></div>
+        <div class="line"><span>Цена</span><b>${tg(a.price)}</b></div>
+        <div class="line"><span>Телефон</span><b>${c.phone}</b></div>
+        <div class="line"><span>Статус</span><b>${stPill(a)}</b></div>
+        ${ROLE === 'own' && a.m !== 'own' ? `<div class="line"><span>Мастеру 40%</span><b>${tg(a.price * m.pct)}</b></div>` : ''}
+      </div>
+      <div class="muted">Была ${visits.length} раз, принесла ${tg(visits.reduce((t, x) => t + x.price, 0))}</div>
+      ${a.st === 'wait' ? `<button class="btn btn-teal" id="paid">✅ Пришла и оплатила</button><button class="btn btn-ghost" id="nos">Не пришла</button>` : ''}
+      <button class="btn btn-ghost" id="msg">Написать клиенту в WhatsApp</button>`);
+    const p = document.getElementById('paid'); if (p) p.onclick = () => { a.st = 'done'; a.pay = 'Kaspi'; close(); render(); toast('Оплата записана, материалы списаны (в демо не сохраняется)'); };
+    const n = document.getElementById('nos'); if (n) n.onclick = () => { a.st = 'noshow'; close(); render(); toast('Отмечено: не пришла'); };
+    document.getElementById('msg').onclick = () => toast('Откроется WhatsApp с номером клиента (в демо не открывается)');
+  }
+
+  function newAp() {
+    const opts = (ROLE === 'own' ? MASTERS : MASTERS.filter(m => m.id === ROLE)).map(m => `<option value="${m.id}">${m.name}</option>`).join('');
+    open(`<button class="close" data-x>×</button><h3>Новая запись</h3>
+      <div class="form">
+        <label>Клиент</label><input id="fc" placeholder="Имя или телефон" list="cls"><datalist id="cls">${CL.map(c => `<option value="${c.name}">`).join('')}</datalist>
+        <label>Услуга</label><select id="fs">${SERV.map((s, i) => `<option value="${i}">${s.n} · ${tg(s.p)}</option>`).join('')}</select>
+        <label>Мастер</label><select id="fm">${opts}</select>
+        <label>Дата и время</label><input id="fd" type="datetime-local" value="2026-11-28T15:00">
+      </div>
+      <button class="btn btn-teal" id="save">Записать</button>`);
+    document.getElementById('save').onclick = () => {
+      const name = document.getElementById('fc').value.trim() || 'Новая клиентка';
+      let c = CL.find(x => x.name === name);
+      if (!c) { c = { id: CL.length + 1, name, phone: '+7 700 000 00 00', color: '#1f9e90', src: 'Новая' }; CL.push(c); }
+      const s = SERV[+document.getElementById('fs').value];
+      const dt = document.getElementById('fd').value || '2026-11-28T15:00';
+      const d = new Date(dt);
+      AP.push({ id: aid++, date: dt.slice(0, 10), d: new Date(d.getFullYear(), d.getMonth(), d.getDate()), t: dt.slice(11, 16), m: document.getElementById('fm').value, c: c.id, s: s.n, price: s.p, mat: s.mat, st: 'wait', pay: '' });
+      AP.sort((a, b) => a.date.localeCompare(b.date) || a.t.localeCompare(b.t));
+      dayOff = Math.round((new Date(d.getFullYear(), d.getMonth(), d.getDate()) - TODAY) / 864e5);
+      close(); tab = 'today'; render(); toast('Записано (в демо не сохраняется)');
+    };
+  }
+
+  function clients() {
+    const stats = CL.map(c => {
+      const v = AP.filter(a => a.c === c.id && a.st === 'done' && mine(a));
+      const last = v.length ? v[v.length - 1].d : null;
+      const next = AP.find(a => a.c === c.id && a.st === 'wait' && mine(a));
+      return { c, n: v.length, sum: v.reduce((t, a) => t + a.price, 0), last, next };
+    }).filter(x => (ROLE === 'own' || x.n || x.next) && (!q || (x.c.name + x.c.phone).toLowerCase().replace(/\s/g, '').includes(q)));
+    stats.sort((a, b) => b.sum - a.sum);
+    const lost = stats.filter(x => x.n && !x.next && (TODAY - x.last) / 864e5 > 21);
+    V.innerHTML = `
+      <div class="search"><input id="q" placeholder="Имя или телефон" value="${q}"></div>
+      ${lost.length ? `<div class="card"><h3>⏰ Пора на коррекцию</h3><div class="muted" style="margin-bottom:6px">Были больше 3 недель назад и не записаны. Можно написать им.</div>${lost.slice(0, 4).map(cRow).join('')}</div>` : ''}
+      <div class="card"><h3>${ROLE === 'own' ? 'Все клиенты' : 'Мои клиенты'} · ${stats.length}</h3>${stats.map(cRow).join('')}</div>`;
+    const i = document.getElementById('q');
+    i.oninput = () => { q = i.value.trim().toLowerCase().replace(/\s/g, ''); const p = i.selectionStart; clients(); const n = document.getElementById('q'); n.focus(); n.setSelectionRange(p, p); };
+    V.querySelectorAll('[data-c]').forEach(e => e.onclick = () => cCard(+e.dataset.c));
+  }
+  function cRow(x) {
+    return `<div class="cl" data-c="${x.c.id}"><div class="ava" style="background:${x.c.color}">${x.c.name[0]}</div>
+      <div><div style="font-weight:600">${x.c.name}</div><div class="muted">${x.n} визит(а) · ${x.last ? 'была ' + x.last.getDate() + ' ' + MON[x.last.getMonth()] : 'ещё не была'}${x.next ? ' · запись ' + x.next.d.getDate() + '.' + (x.next.d.getMonth() + 1) : ''}</div></div>
+      <div style="margin-left:auto;font-weight:700;font-size:14px;white-space:nowrap">${tg(x.sum)}</div></div>`;
+  }
+  function cCard(id) {
+    const c = C(id), v = AP.filter(a => a.c === id && mine(a));
+    open(`<button class="close" data-x>×</button><h3>${c.name}</h3><div class="muted">${c.phone} · откуда: ${c.src}</div>
+      <div class="card" style="margin-top:12px"><h3>История</h3>${v.slice().reverse().map(apRow).join('') || '<div class="muted">Пока нет записей</div>'}</div>
+      <button class="btn btn-teal" id="rec">Записать снова</button>`);
+    document.getElementById('rec').onclick = () => { close(); newAp(); document.getElementById('fc').value = c.name; };
+    document.querySelectorAll('#sheetBox [data-a]').forEach(e => e.onclick = () => apCard(+e.dataset.a));
+  }
+
+  function money() {
+    const done = AP.filter(a => a.st === 'done');
+    const rev = done.reduce((t, a) => t + a.price, 0);
+    const byM = MASTERS.map(m => { const l = done.filter(a => a.m === m.id); const r = l.reduce((t, a) => t + a.price, 0); return { m, n: l.length, r, pay: r * m.pct }; });
+    const pay = byM.reduce((t, x) => t + x.pay, 0);
+    const mat = done.reduce((t, a) => t + a.mat, 0);
+    const ads = 60000, rent = 150000, other = 18000, tax = rev * 0.03;
+    const profit = rev - pay - mat - ads - rent - other - tax;
+    const noshow = AP.filter(a => a.st === 'noshow');
+    V.innerHTML = `
+      <div class="tiles">
+        <div class="tile hl"><div class="l">Вам осталось за ноябрь</div><div class="v">${tg(profit)}</div><div class="n">из ${tg(rev)} выручки</div></div>
+        <div class="tile"><div class="l">Визитов</div><div class="v">${done.length}</div><div class="n">средний чек ${tg(rev / Math.max(1, done.length))}</div></div>
+      </div>
+      <div class="card"><h3>Ноябрь 2026</h3>
+        <div class="line"><span>Выручка</span><b>${tg(rev)}</b></div>
+        <div class="line"><span>Мастерам 40%</span><b class="neg">−${tg(pay)}</b></div>
+        <div class="line"><span>Материалы (по услугам)</span><b class="neg">−${tg(mat)}</b></div>
+        <div class="line"><span>Аренда</span><b class="neg">−${tg(rent)}</b></div>
+        <div class="line"><span>Реклама Instagram</span><b class="neg">−${tg(ads)}</b></div>
+        <div class="line"><span>Связь, Kaspi, мелочи</span><b class="neg">−${tg(other)}</b></div>
+        <div class="line"><span>Налог (пример 3%)</span><b class="neg">−${tg(tax)}</b></div>
+        <div class="line tot"><span>Осталось вам</span><b class="pos">${tg(profit)}</b></div>
+      </div>
+      <div class="card"><h3>По мастерам</h3>
+        ${byM.map(x => `<div class="line"><span><span class="dot" style="background:${x.m.color}"></span>${x.m.name}: ${x.n} визитов</span><b>${tg(x.r)}</b></div>${x.m.pct ? `<div class="muted" style="margin:-4px 0 6px 14px">Заработала ${tg(x.pay)}, студии принесла ${tg(x.r - x.pay)}</div>` : ''}`).join('')}
+      </div>
+      <div class="card"><h3>Что подсказывает финансист</h3>
+        <div class="line"><span>💡 Коррекции ${Math.round(done.filter(a => a.s === 'Коррекция').length / done.length * 100)}% визитов. Напоминание «пора на коррекцию» через 3 недели вернёт часть клиенток, которые пропадают.</span></div>
+        <div class="line"><span>💡 Не пришли ${noshow.length} клиенток, это ${tg(noshow.reduce((t, a) => t + a.price, 0))} потерянной выручки. Можно брать предоплату 2 000 ₸.</span></div>
+        <div class="line"><span>💡 Реклама: ${CL.filter(c => c.src === 'Реклама').length} клиенток пришли по рекламе, остальные по Instagram и рекомендациям.</span></div>
+      </div>
+      <a class="btn btn-teal" href="./">Хочу такой учёт</a>`;
+  }
+
+  function stock() {
+    V.innerHTML = `
+      <div class="note">После инвентаризации остатки ведутся сами: покупку материалов мастер или вы скидываете боту (чек или «купила 2 клея»), а при каждой услуге материалы списываются.</div>
+      <div class="card"><h3>Материалы</h3>
+        ${STOCK.map(s => { const low = s.q <= s.min; return `<div style="padding:8px 0;border-top:1px solid var(--line)"><div style="display:flex;justify-content:space-between;font-size:14px"><span>${s.n}</span><b class="${low ? 'neg' : ''}">${s.q} ${s.unit}</b></div><div class="bar"><i class="${low ? 'low' : ''}" style="width:${Math.min(100, s.q / (s.min * 3) * 100)}%"></i></div>${low ? '<div class="muted neg">Заканчивается, пора заказать</div>' : ''}</div>`; }).join('')}
+      </div>
+      <div class="card"><h3>Стоимость остатков</h3><div class="line"><span>На складе материалов на</span><b>${tg(STOCK.reduce((t, s) => t + s.q * s.cost, 0))}</b></div></div>`;
+  }
+
+  function open(h) { document.getElementById('sheetBox').innerHTML = h; document.getElementById('sheet').classList.add('open'); document.querySelectorAll('[data-x]').forEach(b => b.onclick = close); }
+  function close() { document.getElementById('sheet').classList.remove('open'); }
+  document.getElementById('sheet').onclick = e => { if (e.target.id === 'sheet') close(); };
+  document.getElementById('fab').onclick = newAp;
+  const R = { today, clients, money, stock };
+  function render() {
+    roles();
+    document.querySelectorAll('.nav button').forEach(b => b.classList.toggle('on', b.dataset.t === tab));
+    document.getElementById('fab').style.display = tab === 'today' || tab === 'clients' ? '' : 'none';
+    R[tab]();
+  }
+  document.querySelectorAll('.nav button').forEach(b => b.onclick = () => { tab = b.dataset.t; render(); window.scrollTo(0, 0); });
+  render();
+})();
+</script>
+</body>
+</html>
